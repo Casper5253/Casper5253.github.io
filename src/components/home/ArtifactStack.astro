@@ -1,0 +1,110 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import type { ArtifactId, Artifact } from '../../data/artifacts';
+import type { StageId } from '../../data/stages';
+import { ARTIFACTS } from '../../data/artifacts';
+import { href } from '../site/url';
+
+interface Props {
+  stageId: StageId;
+  project: CollectionEntry<'projects'>;
+  itemIds: ArtifactId[];
+  /** False when the project's diagram already carries the case-study link for this chapter. */
+  caseLink?: boolean;
+}
+
+const { stageId, project, itemIds, caseLink = true } = Astro.props;
+const responsiveWidths = (artifact: Artifact) => {
+  const widths = [480, 960, 1440].filter((width) => width < artifact.image.width);
+  return widths.length ? widths : [artifact.image.width];
+};
+const dialogId = `artifact-dialog-${stageId}-${project.id}`;
+const items = await Promise.all(itemIds.map(async (id) => {
+  const artifact: Artifact = ARTIFACTS[id];
+  const fullWidth = Math.min(2400, artifact.image.width);
+  const fullImage = await getImage({ src: artifact.image, width: fullWidth, format: 'webp' });
+  const isFilmStill = id.startsWith('film-') && id !== 'film-energy' && id !== 'film-title-reveal';
+  const objectFit = artifact.label === 'Article opening' || isFilmStill ? 'cover' : 'contain';
+  return { artifact, fullSrc: fullImage.src, objectFit };
+}));
+---
+
+<section class="artifact-group" data-artifact-plane data-project={project.id} aria-labelledby={`stack-heading-${stageId}-${project.id}`}>
+  <div class="artifact-group-heading">
+    <h3 id={`stack-heading-${stageId}-${project.id}`}>{project.data.title}</h3>
+    {project.data.caseStudy && caseLink && <a href={href(`/work/${project.id}/`)}>Case study<span class="vh">: {project.data.title}</span></a>}
+  </div>
+
+  <div class="artifact-stack" data-stack style={`--stack-count:${items.length}`}>
+    {items.map(({ artifact, fullSrc, objectFit }, index) => (
+      <button
+        class:list={['stack-card', { 'is-current': index === 0 }]}
+        type="button"
+        data-stack-card
+        data-title={artifact.title}
+        data-label={artifact.label}
+        data-caption={artifact.caption}
+        data-alt={artifact.alt}
+        data-full-src={fullSrc}
+        data-dark={artifact.dark ? 'true' : undefined}
+        data-case-href={project.data.caseStudy ? href(`/work/${project.id}/`) : undefined}
+        data-project-title={project.data.title}
+        data-article-href={project.data.article ? href(project.data.article.href) : undefined}
+        data-article-title={project.data.article?.title}
+        aria-label={`Select ${artifact.title}`}
+        style={`--stack-index:${index};--card-count:${items.length};--pointer-x:0px;--pointer-y:0px`}
+      >
+        <span class:list={['artifact-print', { 'is-lit-print': artifact.print }]}>
+          <Image
+            src={artifact.image}
+            widths={responsiveWidths(artifact)}
+            sizes="(max-width: 600px) 78vw, (max-width: 1050px) 82vw, 54vw"
+            alt=""
+            loading={index === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            style={`aspect-ratio:${artifact.image.width}/${artifact.image.height};object-fit:${objectFit};object-position:${artifact.focus ?? 'center'}`}
+          />
+          <span class="artifact-title">{artifact.title}</span>
+        </span>
+      </button>
+    ))}
+  </div>
+
+  <div class="stack-index" role="group" aria-label={`Select an artifact from ${project.data.title}`}>
+    {items.map(({ artifact }, index) => (
+      <button
+        type="button"
+        data-stack-index
+        data-index={index}
+        aria-label={`Select item ${index + 1}: ${artifact.title}`}
+        aria-pressed={index === 0 ? 'true' : 'false'}
+      >
+        <span>{String(index + 1).padStart(2, '0')}</span>
+        {index === 0 && <span class="index-label">{artifact.label}</span>}
+      </button>
+    ))}
+  </div>
+
+  <div class="stack-caption" data-stack-caption aria-live="polite">
+    <h4 data-caption-title>{items[0]?.artifact.title}</h4>
+    <p data-caption-copy>{items[0]?.artifact.caption}</p>
+    <div class="caption-links" data-caption-links>
+      {project.data.caseStudy && caseLink && <a href={href(`/work/${project.id}/`)}>Case study<span class="vh">: {project.data.title}</span></a>}
+      {project.data.article && <a href={href(project.data.article.href)}>Read the article</a>}
+    </div>
+  </div>
+
+  <dialog class="artifact-dialog" id={dialogId} aria-labelledby={`${dialogId}-title`}>
+    <div class="dialog-bar">
+      <p class="eyebrow">{project.data.title}</p>
+      <button type="button" data-dialog-close aria-label="Close image">Close</button>
+    </div>
+    <img data-dialog-image alt="" />
+    <div class="dialog-copy">
+      <h3 id={`${dialogId}-title`} data-dialog-title></h3>
+      <p data-dialog-caption></p>
+      <div class="caption-links" data-dialog-links></div>
+    </div>
+  </dialog>
+</section>

@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { STATUSES } from '../../content.config';
+import { href } from '../site/url';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+---
+
+<article class="project-card" data-project={project.id}>
+  <p class="project-status">{STATUSES[project.data.status]}</p>
+  <h3>{project.data.title}</h3>
+  {project.data.home?.note && <p class="project-note">{project.data.home.note}</p>}
+  <div class="project-links">
+    {project.data.caseStudy && <a href={href(`/work/${project.id}/`)}>Case study<span class="vh">: {project.data.title}</span></a>}
+    {project.data.article && <a href={href(project.data.article.href)}>Read the article <span aria-hidden="true">↗</span></a>}
+  </div>
+</article>

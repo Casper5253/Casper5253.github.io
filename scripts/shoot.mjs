@@ -1,0 +1,14 @@
+import { chromium } from 'playwright-core';
+const [,, url, out, w = '1440', h = '900', full = '1', dpr = '1'] = process.argv;
+const b = await chromium.launch({ channel: 'msedge' });
+const p = await b.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: +dpr });
+const errors = [];
+p.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+p.on('pageerror', (e) => errors.push(e.message));
+await p.goto(url, { waitUntil: 'networkidle' });
+await p.addStyleTag({ content: 'astro-dev-toolbar{display:none!important}' });
+await p.evaluate(async () => { for (const i of document.images) { i.loading = 'eager'; } await Promise.all([...document.images].map((i) => i.decode().catch(() => {}))); });
+await p.waitForTimeout(1200);
+await p.screenshot({ path: out, fullPage: full === '1' });
+console.log(out, errors.length ? 'ERRORS: ' + errors.join(' | ') : 'no console errors');
+await b.close();

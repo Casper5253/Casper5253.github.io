@@ -1,0 +1,20 @@
+---
+import { href } from '../components/site/url';
+
+const target = href('/about/');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Redirecting to About & CV</title>
+    <meta name="description" content="The old CV address. Redirects to the About & CV page." />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+  </head>
+  <body class="cv-redirect">
+    <p>This page has moved. <a href={target}>Go to About & CV.</a></p>
+  </body>
+</html>

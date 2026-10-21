@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How I explored, tested and reshaped the ideas behind this portfolio with a team of coding agents.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How This Site Was Built">
+<meta property="og:description" content="How I explored, tested and reshaped the ideas behind this portfolio with a team of coding agents.">
+<meta property="og:url" content="https://casper5253.github.io/writing/how-this-site-was-built/">
+<meta property="og:image" content="https://casper5253.github.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<title>How This Site Was Built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --paper: #f5f7fa; --ink: #16202c; --muted: #586476; --rule: #d9dfe7; --wash: #e9edf3;
+  --lead: #5a4ed8; --codex: #0d8679; --oc: #b9770f; --warn: #c2402f;
+  --term: #111721; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #263142;
+  --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Literata", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f141b; --ink: #e5e9ef; --muted: #98a3b3; --rule: #273141; --wash: #18202b;
+  --lead: #9b92ff; --codex: #3fc4b4; --oc: #e7a83d; --warn: #f07a68;
+  --term: #0a0e14; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #222c3b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0f141b; --ink: #e5e9ef; --muted: #98a3b3; --rule: #273141; --wash: #18202b;
+  --lead: #9b92ff; --codex: #3fc4b4; --oc: #e7a83d; --warn: #f07a68;
+  --term: #0a0e14; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #222c3b; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 18px; line-height: 1.68;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px; }
+.col { max-width: 680px; margin-inline: auto; width: 100%; }
+.wide { max-width: 960px; margin-inline: auto; width: 100%; }
+h1, h2, h3, .label, .kicker { font-family: var(--f-display); text-wrap: balance; }
+h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.04; letter-spacing: -0.025em; font-weight: 800; margin: 0; }
+h2 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -0.015em; font-weight: 700; margin: 0; }
+p { margin: 0; }
+.kicker { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+p code, li code { background: var(--wash); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--lead); }
+.dek { font-size: 1.28rem; line-height: 1.5; color: var(--muted); }
+.byline { font-family: var(--f-display); font-size: 0.9rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.byline b { color: var(--ink); font-weight: 700; }
+
+header.top { padding-block: 64px 36px; display: grid; gap: 22px; }
+article { display: grid; gap: 64px; }
+section { display: grid; gap: 22px; }
+.prose { display: grid; gap: 1.1em; }
+figure { margin: 0; display: grid; gap: 12px; min-width: 0; }
+figcaption { font-family: var(--f-display); font-size: 0.88rem; line-height: 1.5; color: var(--muted); max-width: 680px; }
+figcaption b { color: var(--ink); }
+.foot { font-family: var(--f-display); font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+hr.end { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); counter-reset: s; }
+.steps li { counter-increment: s; padding: 34px 14px 0 0; position: relative; font-size: 0.9rem; line-height: 1.45; }
+.steps li::before { content: counter(s); position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--paper);
+  font-family: var(--f-display); font-weight: 700; font-size: 0.8rem; display: grid; place-items: center; }
+.steps li::after { content: ""; position: absolute; top: 11px; left: 30px; right: 6px; height: 2px; background: var(--rule); }
+.steps li:last-child::after { display: none; }
+.steps b { font-family: var(--f-display); display: block; margin-bottom: 4px; }
+
+.back { position: fixed; left: 16px; bottom: 16px; z-index: 9999; background: #1d1f23; color: #fff;
+  font: 600 13px system-ui, sans-serif; padding: 8px 12px; text-decoration: none; border-radius: 4px; }
+@media (max-width: 720px) {
+  .steps { grid-template-columns: 1fr; gap: 14px; }
+  .steps li { padding: 0 0 0 38px; }
+  .steps li::after { display: none; }
+  .back { position: static; display: inline-block; margin: 12px 16px 0; }
+}
+
+/* Grid children may shrink below their content width, so nothing pushes the page wider than a phone. */
+header.top, article, section, .prose { grid-template-columns: minmax(0, 1fr); }
+header.top > *, article > *, section > *, .prose > * { min-width: 0; }
+</style>
+</head>
+<body>
+<a class="back" href="../../">&#8592; Casper van Tongeren</a>
+<main>
+<header class="top col">
+  <div class="kicker">Design notes · Portfolio exploration</div>
+  <h1>How this site was built</h1>
+  <p class="dek">I did not arrive at this design by describing one perfect website. I got there by making many imperfect ones, noticing what I liked, and changing the question whenever the evidence said the old question was too small.</p>
+  <div class="byline"><span><b>Casper van Tongeren</b></span><span>A first-person account</span></div>
+</header>
+
+<article>
+<section class="col">
+  <div class="prose">
+    <p>I started with a simple request: make me a portfolio. What followed was a sequence of useful corrections. The finished site is not one agent guessing correctly; it is the result of making guesses visible, reacting to them, and deciding which ones deserved to stay.</p>
+    <p>The prompts mark that change in ambition: “make me anything”, “make something for ME”, “make me a million things”, “make things that behave differently”, and finally “do research and make me things that we know work”. The wording sounds like a design brief getting louder. In practice, each line fixed a specific failure in the work before it.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>A map that was good, but not mine</h2>
+  <div class="prose">
+    <p>The first version treated projects as stations, areas of work as lines, and connections as interchanges. It passed six review gates. As connected storytelling it worked, and I thought the result was genuinely exceptional.</p>
+    <p>But I did not particularly care about trains. The site had quality without the artistic identity I wanted. Passing checks had not made its central metaphor personal. “Make something for ME” produced a snow stoat, a build manual, and an editorial field guide: the map with an animal added, skills recast as parts, and an animal motif doing too much work.</p>
+    <p>I rejected the set. They were variations, not independent answers. We had mistaken personalisation for decoration, so the next workers saw facts rather than the first site.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>More ideas, then different behaviour</h2>
+  <div class="prose">
+    <p>“Make me a million things” became eight independent concepts. Each worker received a private brief and the same facts. The results were closer, but several pages shared one shape: an introduction beside a visual, then evidence below. Their premises varied more than their layouts, and many interactions only switched the project on display.</p>
+    <p>I realised I was asking for more visual variety when what I wanted was a different kind of experience. The old map was memorable partly because it behaved like a map. So the next request was to make things that behaved differently. Eight concepts followed: growing colonies, a pile of work to move around, a lens over a product, a physical-looking instrument, a marble machine, a cord to thread, a signal to tune, and an optical print to decode.</p>
+    <p>That round made interaction the premise rather than a flourish. It also showed how easily teams drift back to familiar layouts. A reviewer had to check whether the prototypes really behaved differently, whether an interaction had a meaningful payoff, and whether the visuals worked in the rendered page rather than only in a description.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Research before another pile of mockups</h2>
+  <div class="prose">
+    <p>After interaction came the prompt to research what worked and make things from that. We looked at galleries, engineer portfolios, creative technology, data visualisation, and case studies. More than 65 traits informed eleven mockups. The point was not to copy a site I admired, but to separate impressive techniques from choices that made work clearer or more credible.</p>
+    <p>The recurring lesson was unexpectedly conventional: evidence you can operate is stronger than evidence you merely read; numbers need their source; honest status is better than a vague claim; and project stories should begin with the question or constraint. A clear name, a direct positioning line, and good editorial hierarchy still matter. Personality helped most when it was bounded, rather than spread over every element.</p>
+    <p>Research made the work more credible, but also pulled it toward familiar website patterns. That was useful as a baseline, not a reason to stop exploring. We then mapped about forty mockups into ten directions. Each direction had one home for every concept and a checklist of what it kept, simplified, or left out. Without that map, consolidation would have been an invitation to lose the good bits by accident.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Chapters gave the story a place to live</h2>
+  <div class="prose">
+    <p>The question shifted from “what could a portfolio look like?” to “how should this story be organised?” Phase 2 compared an essay, an operating diagram, and chapters. I liked the essay's voice and unfolding evidence; the operating picture felt cramped and gimmicky. Chapters gave the clearest overview and a smooth movement between sections.</p>
+    <p>I chose Chapters as the strongest structure, but that did not mean every part of the prototype was right. I wanted actual imagery and something with more visual personality. The next experiments each added one ingredient without changing the story: Depth brought a night palette and a field of points that reacted to a pointer; Made Things brought in real artifacts; The Thread drew one line through the chapters.</p>
+  </div>
+</section>
+
+<section class="wide">
+  <figure>
+    <ol class="steps" aria-label="The five stages I want the site to tell">
+      <li><b>Understand the problem</b>Start with the person and the insight behind the request.</li>
+      <li><b>Build the first working thing</b>Make a smart first version of the useful thing.</li>
+      <li><b>Refine it with real feedback</b>Make the tool bespoke to the people who will use it.</li>
+      <li><b>Deliver it and help people use it</b>Help the thing reach the people it was built for.</li>
+      <li><b>Learn, improve, repeat</b>Learn from the work and take it toward the next job.</li>
+    </ol>
+    <figcaption><b>The story I wanted to tell was a working relationship.</b> Not a list of problem categories, and not a career timeline: a person with a need, a useful response, and the work of getting it into use.</figcaption>
+  </figure>
+</section>
+
+<section class="col">
+  <h2>Atmosphere, evidence, then the story underneath</h2>
+  <div class="prose">
+    <p>Each Phase 2.5 experiment made one thing stronger. Depth added atmosphere but said little about the work. Made Things was substantive: papers, figures, and film frames showed what I had made. Some chapters had no shareable artifact, so we could not invent a screenshot. The Thread was distinctive, though quieter than images or glow.</p>
+    <p>The integrated prototype combined Chapters, Made Things, and Depth. It kept the story readable, set the work as lit prints against the dark ground, and let the field sit behind the artifacts rather than compete with them. On a phone, the prints and diagrams stacked into a single column and the field rested when space was tight. I said, “This is it,” before polish. I wanted the dark palette, the interaction, the use of vertical space, and more real imagery.</p>
+    <p>That approval settled the visual direction, but not the story. The five chapter labels still described categories of work. When I was asked to test that structure, I realised it was not how I wanted to explain myself. The important late change was to tell the journey of forward-deployed work: talk to a user and get the insight; build a smart iteration; gather feedback and make the tool bespoke; help with deployment and onboarding; then carry the lesson toward the next job. The examples should fit inside that journey, rather than forcing the journey around a catalogue of examples.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>From prototype to the real site</h2>
+  <div class="prose">
+    <p>Building the real site meant turning the prototype into something maintainable: each project became a Markdown file, the chapters became data, and the release checks became one command that also scans for anything private before it is published. Then I went through the candidate and answered one short feedback form, fourteen questions this time rather than the hundred of an earlier round.</p>
+    <p>My biggest criticism was one the agents had not raised: the same projects kept coming back. The data-quality tool appeared in three chapters, hx in three, and the page felt padded. The fix was structural rather than editorial. Each project now names exactly one chapter in its own file, so a second appearance cannot even be written down. I also rewrote the lessons in my own words, and asked for the stars to stop flickering while I scrolled. That turned out to be the field blanking itself on every scroll event and redrawing when scrolling stopped.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>The team behind the drafts</h2>
+  <div class="prose">
+    <p>I worked with a small agent team. One lead agent shaped the sequence of work, wrote the briefs, reviewed results, and made sure decisions were carried forward. An implementer took bounded building tasks, often on cheaper models. A reviewer from a different vendor looked for mistakes the builder or lead might miss. The router, hx, helped assign work according to the task and the team's available model budget. I was the decision maker: the agents could show me options and explain trade-offs, but they could not decide what felt like me.</p>
+    <p>The roles mattered more than tool names. Separate implementation and review made results easier to challenge; distinct briefs helped early rounds diverge. Decision records explained why a feature had been simplified, so a later builder would not quietly restore it. Private briefs helped with variety; visual review mattered during execution.</p>
+    <p>I wrote more about routing the team, its budgets, and the practical work of coordinating agents in <a href="../hx/">Herding three coding agents on one budget</a>.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Last, we tried to prove it was not ready</h2>
+  <div class="prose">
+    <p>Before I would publish it, I wanted the strongest criticism I could get from people who had not built it. Two frontier models from different vendors, Claude Opus and Codex Sol, each started a fresh session with no memory of the build. They got the same short packet: the approved design, my preferences and dislikes, the verified facts, and a list of visitor tasks. Then they were told to try to show that the site was not ready, using the running site in real browsers, with every finding tied to something they had actually observed. Neither saw the other's report, nor any verdict I hoped for.</p>
+    <p>They disagreed. Opus, focused on design and story, called it ready after some polish. Sol, focused on engineering, called it not ready: case studies on a phone squeezed the text into a column three words wide, the keyboard's first stop was hidden under the header, and the stars jumped across the screen during small scrolls. That last one was a regression our own flicker fix had caused, and none of our tests had looked for it.</p>
+    <p>Then each read the other's report, re-tested what could be checked, and answered in writing. Opus reproduced all three of Sol's problems and changed its verdict, conceding that it had measured how smoothly frames arrived rather than where the stars went. Sol used my own feedback answers to overturn two of Opus's recommendations that contradicted choices I had already approved, and caught Opus illustrating a point with a story that was not in the evidence. Opus withdrew it. One of Opus's findings landed on the lead agent too: a line written during the fixes claimed a tool was still in use, which nobody could confirm.</p>
+    <p>The agreed list went to the team: three problems that had to be fixed, fourteen smaller ones worth fixing, and a few subjective calls left to me. After the fixes, each reviewer re-checked its own findings in the running site. Most were resolved. One was only partly resolved, a brief dip of the stars in one chapter, and it is recorded rather than declared done.</p>
+    <p>It was the most useful step of the project. A team that has looked at something for weeks stops seeing it. Two critics who disagree, and then have to defend their claims to each other with evidence, find what the builders cannot, and they are honest about what they got wrong.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>What worked, and what did not</h2>
+  <div class="prose">
+    <p>Alternatives worked better than polishing the first idea until it seemed inevitable. Research tested taste against examples. Review caught what a static concept could hide: an interaction with no payoff, text too small on a phone, or a frame crowded by real content. Most importantly, my feedback changed the next prompt.</p>
+    <p>The process was not efficient by default. Cheap models were weaker at visual work, so the lead had to inspect implementations. Too many parallel Codex sessions burned quota without enough return. The lead also had to be told to delegate more. These are coordination failures, not reasons to avoid parallel work: they are reasons to route deliberately and keep a person responsible for choices a model cannot infer.</p>
+    <p>Some experiments did not earn a place. Unusual interactions were not valuable by themselves, and the interactive lab demonstrations were cut. A glowing field made the site feel alive, but only evidence showed what I had made. A clean diagram explained a process while still risking the feel of a product interface instead of a person.</p>
+    <p>That is why the archive is not a parade of failed designs. Some directions were useful answers to narrower questions. The map taught me that structure and identity are different. The essay taught me that voice can carry a site. Chapters showed how the work might be organised. The experiments showed how atmosphere and evidence could share space. Each one became easier to leave behind once I could name what it had taught me.</p>
+  </div>
+</section>
+
+<section class="col">
+  <hr class="end">
+  <p class="foot">The drafts in the <a href="../../archive/">graveyard</a> are a small visual record of that process. They are not a ranked list; the useful answer was assembled from what each round made clear.</p>
+</section>
+</article>
+</main>
+</body>
+</html>

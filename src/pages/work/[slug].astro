@@ -1,0 +1,123 @@
+---
+import { getCollection, render } from 'astro:content';
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import Base from '../../layouts/Base.astro';
+import { href } from '../../components/site/url';
+import { STATUSES } from '../../content.config';
+import { STAGES } from '../../data/stages';
+import { ARTIFACTS } from '../../data/artifacts';
+import Gallery from '../../components/pages/Gallery.astro';
+import '../../styles/pages.css';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('projects', ({ data }) => data.caseStudy && !data.draft);
+  const byOrder = entries.sort((a, b) => a.data.order - b.data.order);
+  return byOrder.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: byOrder[i - 1], next: byOrder[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const data = entry.data;
+const { Content } = await render(entry);
+const stageOf = (id: string) => STAGES.find((stage) => stage.id === id);
+const tone = data.home?.chapter ?? 'understand';
+const galleryItems = data.artifacts.map((id) => ({ key: id, artifact: ARTIFACTS[id] }));
+
+// Split the rendered Markdown into one section per h2, like the prototype's .case-section.
+const container = await AstroContainer.create();
+const bodyHtml = await container.renderToString(Content);
+const sections = bodyHtml
+  .split(/(?=<h2[\s>])/g)
+  .map((chunk) => chunk.trim())
+  .filter(Boolean)
+  .map((chunk) => {
+    const heading = chunk.match(/^<h2[^>]*>([\s\S]*?)<\/h2>/);
+    if (!heading?.[1]) return { label: null, html: chunk };
+    return { label: heading[1].replace(/<[^>]+>/g, '').trim(), html: chunk.slice(heading[0].length).trim() };
+  });
+---
+
+<Base title={data.title} description={data.short}>
+  <div class="page" data-tone={tone}>
+    <header class="case-head">
+      <p class="eyebrow">{data.kind} · {STATUSES[data.status]} · {data.period}</p>
+      <h1>{data.title}</h1>
+      <p class="lede">{data.short}</p>
+      <p class="role">My role: <strong>{data.role}</strong></p>
+      <p class="case-links">
+        {data.article && <a href={href(data.article.href)}>Read the article</a>}
+        {data.repo && <a href={data.repo}>Public repository</a>}
+        {data.links.map((link) => (
+          <a href={link.url}>{link.label}</a>
+        ))}
+      </p>
+    </header>
+
+    <div class="case-main">
+      <div class="case-body">
+        {sections.map((section) => (
+          section.label === null
+            ? <div class="case-intro" set:html={section.html} />
+            : (
+              <section class="case-section">
+                <h2>{section.label}</h2>
+                <div class="case-text" set:html={section.html} />
+              </section>
+            )
+        ))}
+      </div>
+
+      <aside class="case-side">
+        {galleryItems.length > 0 ? (
+          <section>
+            <h2 class="label">Evidence</h2>
+            <Gallery items={galleryItems} />
+          </section>
+        ) : (
+          data.noImage && <p class="mono-note">{data.noImage}</p>
+        )}
+
+        {data.facts.length > 0 && (
+          <section>
+            <h2 class="label">Facts</h2>
+            <dl class="facts">
+              {data.facts.map((fact) => (
+                <div>
+                  <dt>{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                  <dd class="source mono-note">source: {fact.source}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        {data.home && (
+          <section>
+            <h2 class="label">Where it sits in the story</h2>
+            <div class="appears">
+              <p>
+                <a href={href(`/#${data.home.chapter}`)}>{stageOf(data.home.chapter)?.title ?? data.home.chapter}</a>
+                <span class="note">{data.home.note}</span>
+              </p>
+            </div>
+          </section>
+        )}
+      </aside>
+    </div>
+
+    <nav class="case-nav" aria-label="More projects">
+      <p>
+        {prev && <span class="dir">Previous</span>}
+        {prev && <a href={href(`/work/${prev.id}/`)}>{prev.data.title}</a>}
+      </p>
+      <p><a href={href('/')}>Back to the story</a></p>
+      <p>
+        {next && <span class="dir">Next</span>}
+        {next && <a href={href(`/work/${next.id}/`)}>{next.data.title}</a>}
+      </p>
+    </nav>
+  </div>
+</Base>

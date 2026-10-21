@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Field report: running Claude, Codex and OpenCode as one team on one budget, with hx for routing, quota and compaction.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Herding Three Coding Agents">
+<meta property="og:description" content="Field report: running Claude, Codex and OpenCode as one team on one budget, with hx for routing, quota and compaction.">
+<meta property="og:url" content="https://casper5253.github.io/writing/hx/">
+<meta property="og:image" content="https://casper5253.github.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<title>Herding Three Coding Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single 680px reading column; figures break out to 960px. One terminal "screen" opens the piece. */
+:root {
+  --paper: #f5f7fa; --ink: #16202c; --muted: #586476; --rule: #d9dfe7; --wash: #e9edf3;
+  --lead: #5a4ed8; --codex: #0d8679; --oc: #b9770f; --warn: #c2402f;
+  --term: #111721; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #263142;
+  --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Literata", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f141b; --ink: #e5e9ef; --muted: #98a3b3; --rule: #273141; --wash: #18202b;
+  --lead: #9b92ff; --codex: #3fc4b4; --oc: #e7a83d; --warn: #f07a68;
+  --term: #0a0e14; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #222c3b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0f141b; --ink: #e5e9ef; --muted: #98a3b3; --rule: #273141; --wash: #18202b;
+  --lead: #9b92ff; --codex: #3fc4b4; --oc: #e7a83d; --warn: #f07a68;
+  --term: #0a0e14; --term-ink: #d6dde8; --term-dim: #7d8899; --term-rule: #222c3b; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 18px; line-height: 1.68;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px; }
+.col { max-width: 680px; margin-inline: auto; width: 100%; }
+.wide { max-width: 960px; margin-inline: auto; width: 100%; }
+h1, h2, h3, .label, .kicker { font-family: var(--f-display); text-wrap: balance; }
+h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.04; letter-spacing: -0.025em; font-weight: 800; margin: 0; }
+h2 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -0.015em; font-weight: 700; margin: 0; }
+p { margin: 0; }
+.kicker { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+p code, li code { background: var(--wash); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--lead); }
+.dek { font-size: 1.28rem; line-height: 1.5; color: var(--muted); }
+.byline { font-family: var(--f-display); font-size: 0.9rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.byline b { color: var(--ink); font-weight: 700; }
+
+header.top { padding-block: 64px 36px; display: grid; gap: 22px; }
+article { display: grid; gap: 64px; }
+section { display: grid; gap: 22px; }
+.prose { display: grid; gap: 1.1em; }
+figure { margin: 0; display: grid; gap: 12px; min-width: 0; }
+figcaption { font-family: var(--f-display); font-size: 0.88rem; line-height: 1.5; color: var(--muted); max-width: 680px; }
+figcaption b { color: var(--ink); }
+.svgwrap { overflow-x: auto; }
+.svgwrap svg { width: 100%; height: auto; display: block; }
+svg text { font-family: var(--f-display); }
+
+.who { font-family: var(--f-display); font-weight: 700; white-space: nowrap; }
+.who.lead { color: var(--lead); } .who.codex { color: var(--codex); } .who.oc { color: var(--oc); }
+
+/* terminal: always dark, in both themes */
+.term { background: var(--term); color: var(--term-ink); border-radius: 10px; overflow: hidden; font-family: var(--f-mono); font-size: 13px; line-height: 1.55;
+  box-shadow: 0 30px 60px -30px rgba(10, 20, 40, 0.45); }
+.term-bar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--term-rule); color: var(--term-dim); font-size: 12px; }
+.term-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--term-rule); display: inline-block; }
+.term-bar span { margin-left: 8px; }
+.panes { display: grid; grid-template-columns: 1.15fr 1fr; }
+.pane { padding: 12px 14px 16px; min-width: 0; display: grid; gap: 6px; align-content: start; }
+.pane.p-lead { grid-row: span 2; border-right: 1px solid var(--term-rule); }
+.pane.p-oc { border-top: 1px solid var(--term-rule); }
+.ptitle { font-weight: 500; font-size: 12px; display: flex; justify-content: space-between; gap: 8px; }
+.ptitle .st { color: var(--term-dim); }
+.p-lead .ptitle b { color: #a59cff; } .p-codex .ptitle b { color: #4fd0c0; } .p-oc .ptitle b { color: #f0b24a; }
+.line { color: var(--term-dim); overflow-wrap: anywhere; }
+.line.me { color: var(--term-ink); }
+.msg { border-left: 2px solid currentColor; padding-left: 8px; overflow-wrap: anywhere; }
+.msg.to-codex { color: #4fd0c0; } .msg.to-oc { color: #f0b24a; } .msg.to-lead { color: #a59cff; }
+.msg span { color: var(--term-ink); }
+.cursor { display: inline-block; width: 7px; height: 14px; background: var(--term-ink); vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (max-width: 640px) { .panes { grid-template-columns: 1fr; } .pane.p-lead { grid-row: auto; border-right: 0; } .pane.p-codex { border-top: 1px solid var(--term-rule); } }
+
+.primer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.primer > div { border-top: 3px solid var(--ink); padding-top: 12px; display: grid; gap: 6px; align-content: start; font-size: 0.95rem; line-height: 1.55; }
+.primer .label { color: var(--ink); }
+@media (max-width: 720px) { .primer { grid-template-columns: 1fr; } }
+
+pre.code { margin: 0; background: var(--wash); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: 13.5px; line-height: 1.6; }
+pre.code .c { color: var(--muted); }
+pre.code .k { color: var(--codex); }
+pre.code .s { color: var(--oc); }
+
+.roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.role { background: var(--wash); border-radius: 8px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; font-size: 0.93rem; line-height: 1.5; }
+.role .meter { height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; }
+.role .meter i { display: block; height: 100%; }
+.role .cost { font-family: var(--f-display); font-size: 0.8rem; color: var(--muted); }
+@media (max-width: 720px) { .roles { grid-template-columns: 1fr; } }
+
+.pull { font-family: var(--f-display); font-size: 1.6rem; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; border-left: 4px solid var(--warn); padding-left: 18px; text-wrap: balance; }
+
+.router { border: 1px solid var(--rule); border-radius: 10px; display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); overflow: hidden; }
+.router form { padding: 18px; display: grid; gap: 16px; align-content: start; border-right: 1px solid var(--rule); font-family: var(--f-display); font-size: 0.92rem; }
+.router fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; min-width: 0; }
+.router legend { padding: 0; margin-bottom: 4px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { border: 1px solid var(--rule); border-radius: 999px; padding: 4px 11px; cursor: pointer; font-size: 0.86rem; }
+.seg label:hover { border-color: var(--muted); }
+.seg input:checked + label { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.seg input:focus-visible + label { outline: 2px solid var(--lead); outline-offset: 2px; }
+.router input[type=range] { width: 100%; accent-color: var(--lead); }
+.rangeval { font-variant-numeric: tabular-nums; color: var(--ink); }
+.verdict { padding: 18px 20px; display: grid; gap: 14px; align-content: start; min-width: 0; background: var(--wash); }
+.verdict .big { font-family: var(--f-display); font-size: 1.45rem; font-weight: 800; line-height: 1.2; }
+.verdict .why { font-size: 0.98rem; }
+.trail { display: flex; flex-wrap: wrap; gap: 6px; font-family: var(--f-mono); font-size: 12px; }
+.trail span { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 7px; }
+.trail span.end { border-color: currentColor; font-weight: 500; }
+@media (max-width: 720px) { .router { grid-template-columns: 1fr; } .router form { border-right: 0; border-bottom: 1px solid var(--rule); } }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--f-display); font-size: 0.85rem; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); counter-reset: s; }
+.steps li { counter-increment: s; padding: 34px 14px 0 0; position: relative; font-size: 0.9rem; line-height: 1.45; }
+.steps li::before { content: counter(s); position: absolute; top: 0; left: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--paper);
+  font-family: var(--f-display); font-weight: 700; font-size: 0.8rem; display: grid; place-items: center; }
+.steps li::after { content: ""; position: absolute; top: 11px; left: 30px; right: 6px; height: 2px; background: var(--rule); }
+.steps li:last-child::after { display: none; }
+.steps b { font-family: var(--f-display); display: block; margin-bottom: 4px; }
+@media (max-width: 720px) { .steps { grid-template-columns: 1fr; gap: 14px; } .steps li { padding: 0 0 0 38px; } .steps li::after { display: none; } }
+
+.layer { display: grid; grid-template-columns: 160px minmax(0, 1fr) minmax(0, 170px); gap: 18px; padding: 16px 0; border-top: 1px solid var(--rule); font-size: 0.93rem; line-height: 1.5; align-items: start; }
+.layer:last-child { border-bottom: 1px solid var(--rule); }
+.layer .life { font-family: var(--f-display); font-weight: 700; }
+.layer .life small { display: block; font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+.layer .where { font-family: var(--f-mono); font-size: 0.8rem; color: var(--muted); }
+.bar-life { height: 6px; border-radius: 3px; background: var(--lead); margin-top: 8px; }
+@media (max-width: 720px) { .layer { grid-template-columns: 1fr; gap: 6px; } }
+
+.lessons { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; }
+.lessons li { display: grid; gap: 4px; padding-left: 18px; border-left: 2px solid var(--rule); }
+.lessons b { font-family: var(--f-display); font-size: 1.05rem; }
+
+hr.end { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+.foot { font-family: var(--f-display); font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+/* Grid children may shrink below their content width, so nothing pushes the page wider than a phone. */
+header.top, article, section, .prose { grid-template-columns: minmax(0, 1fr); }
+header.top > *, article > *, section > *, .prose > * { min-width: 0; }
+.back-home { position: fixed; left: 16px; bottom: 16px; z-index: 9999; background: #1d1f23; color: #fff; font: 600 13px system-ui, sans-serif; padding: 8px 12px; text-decoration: none; border-radius: 4px; }
+@media (max-width: 640px) {
+  .back-home { position: static; display: inline-block; margin: 12px 16px 0; }
+}
+</style>
+
+</head>
+<body><a class="back-home" href="../../">← Casper van Tongeren</a>
+<main>
+<header class="top col">
+  <div class="kicker">Field report · Multi-agent coding</div>
+  <h1>Herding three coding agents on one budget</h1>
+  <p class="dek">We put Claude, Codex and OpenCode side by side in one terminal and let them work as a team. The hard part turned out to be bookkeeping: who does which job, which model to pay for, and when an agent should forget.</p>
+  <div class="byline"><span><b>October 2026</b></span><span>14 min read</span><span>Windows 11 · Herdr 0.9 · three subscriptions</span></div>
+</header>
+
+<div class="wide" style="margin-bottom:56px">
+  <figure>
+    <div class="term" role="img" aria-label="A terminal split into three panes: a lead agent on the left sending a task to an implementer and a reviewer on the right.">
+      <div class="term-bar"><i></i><i></i><i></i><span>herdr · workspace "todo-cli"</span></div>
+      <div class="panes">
+        <div class="pane p-lead">
+          <div class="ptitle"><b>● lead · Claude</b><span class="st">working</span></div>
+          <div class="line">user: add due dates and priorities to the todo app</div>
+          <div class="line">$ hx usage</div>
+          <div class="line">  opencode week 41% · claude 22% · codex 18%</div>
+          <div class="line">$ hx route --kind feature --size medium --iterative</div>
+          <div class="line">  → opencode · glm-5.3-flash · persistent pane</div>
+          <div class="msg to-oc">to implementer: <span>Task T1. Add --due and --priority, sort list by them, add list --overdue. You own todo/store.py and todo/cli.py. Report with tests.</span></div>
+          <div class="line">… 6 minutes later …</div>
+          <div class="msg to-codex">to reviewer: <span>Review T1. Run git diff main yourself. Look for date bugs.</span></div>
+          <div class="line me">$ <span class="cursor"></span></div>
+        </div>
+        <div class="pane p-codex">
+          <div class="ptitle"><b>● reviewer · Codex</b><span class="st">done</span></div>
+          <div class="line">reading git diff main (3 files)…</div>
+          <div class="msg to-lead">to lead: <span>T1, two findings. --due accepts 20261016 and week dates like 2026-W42-5; allow only YYYY-MM-DD. List rows drop the priority.</span></div>
+        </div>
+        <div class="pane p-oc">
+          <div class="ptitle"><b>● implementer · OpenCode</b><span class="st">idle</span></div>
+          <div class="line">edited todo/store.py, todo/cli.py</div>
+          <div class="line">added tests/test_due.py</div>
+          <div class="line">pytest: 33 passed</div>
+          <div class="msg to-lead">to lead: <span>T1 done. 33 tests pass.</span></div>
+        </div>
+      </div>
+    </div>
+    <figcaption><b>One feature, three agents.</b> The lead plans and checks the budget, a cheap model writes the code, and a model from a different vendor reviews it. Every message is a single line typed from one pane into another. The exchange is condensed from a real test run; one correction round later, the feature was merged.</figcaption>
+  </figure>
+</div>
+
+<article>
+
+<section class="col">
+  <div class="prose">
+    <p>AI coding agents are good enough now that a fair question is how to use several at once. Each lab ships its own command-line agent with its own subscription, and each is better at something. Claude is good at planning and writing. Codex is a careful reviewer. OpenCode is an open-source agent that can run dozens of cheaper models through one plan.</p>
+    <p>Put them in one window and the obvious idea is a team. That part takes an afternoon. What took much longer was everything around it. Which agent should take a task? Which model should it use, and how hard should that model think? How do you avoid burning the expensive subscription on work a cheap model could do? And what happens when an agent's memory fills up halfway through the day?</p>
+    <p>This piece walks through how we answered those questions with a small set of scripts, and what surprised us along the way. You don't need to know any of the tools beforehand.</p>
+  </div>
+</section>
+
+<section class="wide">
+  <div class="col"><h2>First, the moving parts</h2></div>
+  <div class="primer">
+    <div><span class="label">Terminal multiplexer</span><p>A program that splits one terminal window into several panes, each running its own program. <code>tmux</code> is the classic one. Close the window and the panes keep running.</p></div>
+    <div><span class="label">Herdr</span><p>A multiplexer built for AI agents. Each pane gets a name, like <code>hx-codex</code>, and a small command-line tool can type into any pane, read it, and tell whether its agent is busy or idle.</p></div>
+    <div><span class="label">Coding agent</span><p>A chat model that can read files, run commands and edit code in a project. Claude Code, Codex and OpenCode are three of them. Each runs in its own pane.</p></div>
+  </div>
+  <div class="col prose">
+    <p>What makes a team possible is that Herdr lets one agent type into another agent's pane. The lead agent runs a single command:</p>
+  </div>
+  <div class="col"><pre class="code"><span class="c"># lead → reviewer: one line, no pasted code</span>
+herdr agent prompt hx-codex <span class="s">'[team from hx-claude] Review T1. Run git diff main yourself.'</span></pre></div>
+  <div class="col prose">
+    <p>The reviewer sees the message, does the work, and answers the same way. Nobody pastes code into messages. The reviewer is told to run <code>git diff</code> itself, so each message stays a few lines long and no agent's memory fills up with copies of the same code.</p>
+    <p>Because every pane is on screen, a person can follow the whole conversation. That matters more than it sounds. We first ran short-lived helper agents invisibly in the background, and switched to giving each one its own visible window after the person running the team asked for it. A human notices "this has been idle for two minutes" much sooner than any timeout does.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Three agents, three wallets</h2>
+  <div class="prose">
+    <p>Each agent comes with a subscription, and each subscription is a budget that refills on a timer. Claude and Codex give you plenty of a strong model, but not unlimited amounts, and you want them saved for judgment calls. OpenCode's plan is cheap and offers many models. So the plan was simple: spend OpenCode first, and keep Claude and Codex for the work only they can do.</p>
+  </div>
+  <div class="roles">
+    <div class="role"><span class="who lead">Lead · Claude</span><div class="meter"><i style="width:100%;background:var(--lead)"></i></div><p>Scopes the work, routes it, reads the diffs, makes the final call. Writes code itself only when a task is trivial.</p><span class="cost">scarce · spent on judgment</span></div>
+    <div class="role"><span class="who codex">Reviewer · Codex</span><div class="meter"><i style="width:70%;background:var(--codex)"></i></div><p>Reviews every non-trivial change, since a different vendor catches different mistakes. Takes hard implementation when cheap models fail.</p><span class="cost">scarce · spent on review</span></div>
+    <div class="role"><span class="who oc">Implementer · OpenCode</span><div class="meter"><i style="width:30%;background:var(--oc)"></i></div><p>Writes most of the code, on whichever cheap model fits the task. The first place any routine job goes.</p><span class="cost">cheap · spent on volume</span></div>
+  </div>
+  <div class="prose">
+    <p>The first time we actually measured where the money went, that plan wasn't what was happening. OpenCode stores a cost for every reply in a local database, so a few lines of SQL gave the real picture for one week:</p>
+  </div>
+  <figure>
+    <div class="svgwrap"><svg id="spend" viewBox="0 0 680 108" role="img" aria-label="One week of OpenCode spend: Kimi K2.7 used 22.43 dollars of 26.46 total."></svg></div>
+    <figcaption><b>One model used 85% of the week's budget.</b> Kimi K2.7 was the default model of the always-on implementer pane. Every reply re-sent about 138,000 tokens of conversation, so each small edit cost as much as reading a long report.</figcaption>
+  </figure>
+  <div class="prose">
+    <p>Nobody had chosen to spend that money. Kimi was simply the model the pane started with, and a long-running pane re-sends its whole conversation on every turn. That one number shaped the rest of the project: a default nobody looks at can become most of the bill.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Let scripts decide what scripts can know</h2>
+  <div class="prose">
+    <p>The obvious fix is to tell the lead agent to "pick a sensible model". That costs tokens on every decision, and the answer changes with the wording of the prompt. Most of the inputs are plain facts anyway. How much budget is left is a number in a file. Whether a model just hit its quota is a line in a log. Whether another agent is already editing a file is a lookup.</p>
+    <p>So we wrote <code>hx</code>, a small command-line tool with no server and no database, just Python and a few JSON files. The lead calls it the way you would call <code>git</code>. Its most-used command answers one question: given this task, who should do it, on which model, and how hard should that model think?</p>
+  </div>
+  <pre class="code"><span class="c">$ hx route --kind feature --size medium</span>
+{ <span class="k">"worker"</span>: <span class="s">"codex"</span>, <span class="k">"model"</span>: <span class="s">"gpt-6-luna"</span>, <span class="k">"effort"</span>: <span class="s">"medium"</span>,
+  <span class="k">"reason"</span>: <span class="s">"opencode shared pool exhausted; codex fallback (util 0.40)"</span>,
+  <span class="k">"stages"</span>: [<span class="s">"attempt_cap_ok"</span>, <span class="s">"failure_cause"</span>, <span class="s">"pool:opencode"</span>, <span class="s">"tier:default"</span>,
+             <span class="s">"tried:default"</span>, <span class="s">"tried:strong"</span>, <span class="s">"fallback:codex"</span>] }</pre>
+  <div class="prose">
+    <p>That is real output from a day when the OpenCode budget was nearly used up. The router tried OpenCode's models, found no room, and sent the task to Codex's cheapest model instead. Every decision is logged, so later you can check which choices paid off. Here is a simplified version of the same logic to try:</p>
+  </div>
+</section>
+
+<section class="wide">
+  <figure>
+    <div class="router">
+      <form id="rt" aria-label="Router inputs">
+        <fieldset><legend class="label">Task</legend><div class="seg">
+          <input type="radio" name="kind" id="k-trivial" value="trivial"><label for="k-trivial">typo fix</label>
+          <input type="radio" name="kind" id="k-feature" value="feature" checked><label for="k-feature">feature</label>
+          <input type="radio" name="kind" id="k-review" value="review"><label for="k-review">review</label>
+          <input type="radio" name="kind" id="k-arch" value="architecture"><label for="k-arch">design</label>
+        </div></fieldset>
+        <fieldset><legend class="label">Last attempt</legend><div class="seg">
+          <input type="radio" name="fail" id="f-none" value="none" checked><label for="f-none">first try</label>
+          <input type="radio" name="fail" id="f-ctx" value="context"><label for="f-ctx">brief was unclear</label>
+          <input type="radio" name="fail" id="f-cap" value="capability"><label for="f-cap">model not capable enough</label>
+        </div></fieldset>
+        <fieldset><legend class="label">Attempts so far</legend><div class="seg">
+          <input type="radio" name="att" id="a1" value="1" checked><label for="a1">1</label>
+          <input type="radio" name="att" id="a2" value="2"><label for="a2">2</label>
+          <input type="radio" name="att" id="a3" value="3"><label for="a3">3</label>
+          <input type="radio" name="att" id="a4" value="4"><label for="a4">4</label>
+        </div></fieldset>
+        <fieldset><legend class="label">OpenCode budget used this week: <span class="rangeval" id="poolv">40%</span></legend>
+          <input type="range" id="pool" min="0" max="100" step="1" value="40" aria-label="OpenCode budget used">
+        </fieldset>
+      </form>
+      <div class="verdict" aria-live="polite">
+        <span class="label">Route</span>
+        <div class="big" id="rt-big">OpenCode · glm-5.3-flash, warm pane</div>
+        <p class="why" id="rt-why">Cheapest capable model. The implementer pane already runs it and knows the code, so the task goes there.</p>
+        <div class="trail" id="rt-trail"></div>
+      </div>
+    </div>
+    <figcaption><b>The router in miniature.</b> Stages run in order and the first one that decides wins. The real version also weighs Codex and Claude headroom, which files each agent owns, and whether a warm session already has the right model loaded.</figcaption>
+  </figure>
+</section>
+
+<section class="col">
+  <div class="prose">
+    <p>Two rules in there do most of the saving. The first is that <strong>a bad brief never buys a bigger model.</strong> If a task failed because the instructions were unclear or a tool broke, the same model gets a better brief. Only a genuine "not capable enough" failure moves one step up the ladder, and after three attempts the router stops and hands the problem to a human instead of looping.</p>
+    <p>The second is to <strong>prefer the agent that is already warm.</strong> An agent that has worked on the code for an hour already knows it. Re-reading that knowledge from a cache costs far less than starting a fresh agent that has to explore the project from scratch. We learned this one from a live run, where the order of the ladder meant the warm implementer was never picked for medium-sized work.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Picking a model is an experiment, not an opinion</h2>
+  <div class="prose">
+    <p>To fill the ladder we needed to know which cheap models could do the work. We wrote five small tasks: fix a bug, add a feature across three files, debug from a misleading error, refactor, and write tests that must catch planted bugs. Each task had a hidden checker. Before trusting a checker, we ran it against the untouched code, where it must fail, and against a known-good solution, where it must pass. That caught one checker that rejected four correct refactors. Without it, a good model would have looked bad.</p>
+  </div>
+  <figure>
+    <div class="svgwrap"><svg id="cost" viewBox="0 0 680 290" role="img" aria-label="Cost in dollars to complete the same five tasks, per model."></svg></div>
+    <figcaption><b>Same five tasks, very different bills.</b> Bar length is the cost of running all five tasks once; the label after it is how many passed. The most expensive model wasn't the most reliable: Kimi cost twelve times as much as gpt-6-luna and passed one task fewer.</figcaption>
+  </figure>
+  <div class="prose">
+    <p>The more useful lesson came after the benchmark. One model, minimax-m3, passed all five tasks and then failed four of six real edits in exactly the same way. On a real project it read 35,000 to 40,000 tokens of code, used up its fixed 32,000-token thinking budget, and stopped without writing a line. The small benchmark tasks never pushed it that far.</p>
+  </div>
+  <p class="pull">The agent reported success after it failed.</p>
+  <div class="prose">
+    <p>The other trap was quieter. Run in the background, OpenCode exits with code 0, the usual signal for success, after an API error, after a refused permission, and after a reply that was cut off. A script that trusts the exit code believes all of those worked. <code>hx</code> ignores the exit code and reads the run's event log instead: a run counts as finished only if the model ended with a real final message.</p>
+    <p>How hard a model should think turned out to depend on the vendor. For Codex and Claude the effort setting is real: Codex's cheap model at low effort spent 155 thinking tokens on a bug fix and passed. For several OpenCode models the advertised effort levels made no difference we could measure, so the router expresses effort there by choosing a stronger or weaker model, and sends an effort setting only to models that use it.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Why agents need to forget</h2>
+  <div class="prose">
+    <p>A chat model keeps nothing between calls. Every time an agent takes a step, the whole conversation so far is sent again: your messages, its replies, every file it read. Caching makes the repeated part cheaper, but you still pay for it on every call, and a crowded context makes the model slower and less focused. Each turn makes the conversation longer, and every later turn pays for that length again.</p>
+  </div>
+  <figure>
+    <div class="svgwrap"><svg id="ctx" viewBox="0 0 680 284" role="img" aria-label="Context size per call over 60 calls, with and without compaction at task boundaries."></svg></div>
+    <div class="legend"><span><i style="background:var(--warn)"></i>never compacted</span><span><i style="background:var(--lead)"></i>compacted after each finished task</span></div>
+    <figcaption><b>The area under each line is what you pay for.</b> An illustration: context starts at 20K tokens, grows by 4K per call, and compaction brings it back to about 20K. Over sixty calls the compacted agent sends <span id="ctxsave">far fewer tokens</span>.</figcaption>
+  </figure>
+  <div class="prose">
+    <p>The fix is <em>compaction</em>: the agent replaces its long history with a short summary and carries on. Most agents do this on their own when the window is nearly full. But nearly full is late, and it can happen in the middle of a task, when a summary is most likely to drop the one error message that mattered. Our rule is to compact when a task is finished and the history has passed 40% of the window. We also cap that window at 200K tokens, even for models that accept a million, because the cost hurts long before the window fills.</p>
+    <p>Compaction is also where a team can lose work, so <code>hx</code> wraps it in a small protocol:</p>
+  </div>
+  <ol class="steps">
+    <li><b>Wait for the boundary</b>The task is done, the agent is idle, nothing else is assigned to it.</li>
+    <li><b>Write a checkpoint</b>Decisions, exact errors, tests run, the next action. Saved to a file.</li>
+    <li><b>Reserve the agent</b>No new work can be sent to it while it compacts.</li>
+    <li><b>Send /compact</b>Then confirm it is the same session and that it really shrank.</li>
+    <li><b>Prove it remembers</b>It reads the checkpoint and replies with a one-time code and its next action.</li>
+  </ol>
+  <figure>
+    <div class="svgwrap"><svg id="shrink" viewBox="0 0 680 140" role="img" aria-label="Live compaction: 310 thousand tokens before, 31.6 thousand after, against a 200 thousand token limit."></svg></div>
+    <figcaption><b>A real compaction.</b> The implementer had grown to about 310K tokens, well past the limit we set. Afterwards it held 31.6K in the same session, and it built the next feature by reusing a function it had written before the summary.</figcaption>
+  </figure>
+  <div class="prose">
+    <p>That live run also failed in a way no test had predicted. The compaction worked, but the check afterwards said it hadn't. Herdr returns a pane's screen as plain text, not the structured data the code expected, and the agent's interface had wrapped its reply across two lines, splitting the one-time code. The controller did the right thing with what it saw: it marked the result as unknown and refused to send the agent new work until someone looked. We had 240 automated tests at that point. Eleven bugs appeared only once real agents ran on real files, and these two were among them.</p>
+    <p>The lead compacts too. A hook runs just before its summary is written and tells it to keep task IDs, exact errors and next actions word for word. Another hook runs afterwards and puts the active tasks and the latest checkpoint back in front of it. We also wanted to know whether the lead could compact itself on purpose, at a moment it chose. It can: it starts a background job that waits a minute and then sends <code>/compact</code> to its own pane. By then the lead has finished its turn and is idle, so the command runs like any other. Part of this article was written by an agent on the far side of one of those summaries.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>Remembering what matters</h2>
+  <div class="prose">
+    <p>Forgetting on purpose only works if the important things are written down first. We ended up with three layers, each lasting longer than the one before.</p>
+  </div>
+  <div class="layers">
+    <div class="layer"><div class="life">Conversation<small>minutes to hours</small><div class="bar-life" style="width:18%"></div></div><p>Everything the agent is holding right now. Cheap to add to, expensive to keep. Compacted at task boundaries.</p><span class="where">each agent's own session</span></div>
+    <div class="layer"><div class="life">Task checkpoint<small>one task</small><div class="bar-life" style="width:50%"></div></div><p>What one task decided, broke and still needs. Written by the agent doing the work, checked by <code>hx</code> before any compaction.</p><span class="where">.hx/checkpoints/ in the project</span></div>
+    <div class="layer"><div class="life">Knowledge vault<small>permanent</small><div class="bar-life" style="width:100%"></div></div><p>Decisions and lessons worth keeping across projects, in an Obsidian notebook all three agents can search. Old decisions are marked superseded, never deleted.</p><span class="where">Obsidian vault, one note per project</span></div>
+  </div>
+  <div class="prose">
+    <p>The vault is plain Markdown files in folders, readable by people and by all three agents. Every session is captured as a dated note. A separate pass folds what was learned into one current note per project. When an early assumption about how OpenCode meters its budget turned out to be wrong, the old decision stayed in the note, marked superseded, next to the correction. An agent reading the note later sees both, and why one replaced the other.</p>
+  </div>
+</section>
+
+<section class="wide">
+  <div class="col"><h2>One skill, three agents</h2></div>
+  <div class="col prose">
+    <p>All of this behaviour has to live somewhere the agents will read it. Each agent supports <em>skills</em>: a folder holding a Markdown file of instructions, which the agent loads when a task matches the skill's description. The catch is that each vendor looks for skills in its own folder, so a skill written for Claude is invisible to Codex.</p>
+    <p>We didn't have to solve this ourselves. <a href="https://github.com/cursor/plugins/tree/main/pstack">pstack</a>, a skill collection by Lauren Tan, already keeps every skill in one source folder and ships a sync script that copies each one to every agent's location, then checks the copies match. We added the team's two skills, the collaboration rules and the router playbook, to that folder, and pstack's sync delivers them alongside its own.</p>
+  </div>
+  <figure>
+    <div class="svgwrap"><svg id="fan" viewBox="0 0 960 232" role="img" aria-label="One skills folder synced to three agents."></svg></div>
+    <figcaption><b>Write once, sync to three places.</b> pstack's sync script does the copying. Claude and OpenCode happen to read the same folder; Codex reads its own. After every sync the script compares the copies and fails loudly if they differ.</figcaption>
+  </figure>
+  <div class="col prose">
+    <p>"The file was copied" and "the agent loaded it" turned out to be different things. One skill was copied correctly and then ignored, because its one-line description contained a colon followed by a space, which broke the YAML header at the top of the file. The agent fell back to the file's heading and never matched the skill to a task. Now we confirm that each skill appears in each agent's own debug listing, not just that the file exists.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>What we would tell someone starting out</h2>
+  <ul class="lessons">
+    <li><b>Measure the bill before you optimise it.</b><span>Our biggest saving came from a default model nobody had chosen. One query against a local database found it.</span></li>
+    <li><b>Give the facts to scripts and the judgment to models.</b><span>Budgets, retries, file ownership and thresholds are lookups. Paying a model to guess them costs tokens and gives a different answer each time.</span></li>
+    <li><b>Never trust an agent's exit code.</b><span>Read what it did: the final message, the files it changed, the tests it ran.</span></li>
+    <li><b>Benchmark on work that looks like your work.</b><span>Small tasks tell you which models are broken. Only real tasks show where a model breaks.</span></li>
+    <li><b>Forget on purpose, at a boundary, with a receipt.</b><span>Compact when a task is finished, write down what matters first, and make the agent prove it read it.</span></li>
+    <li><b>Keep the agents where you can see them.</b><span>A person watching three panes spots a stuck agent long before any timeout fires.</span></li>
+  </ul>
+</section>
+
+<section class="col">
+  <hr class="end">
+  <p class="foot">The setup runs on Windows 11 with Herdr 0.9, Claude Code, Codex CLI 0.163 and OpenCode on its Go plan. <code>hx</code> is a few thousand lines of standard-library Python with 240 tests. Benchmark costs are single runs on small tasks: good for spotting broken models, weak for ranking close ones. The context chart is an illustration; every other number comes from logs of real runs.</p>
+</section>
+
+</article>
+</main>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  // CSS variables are not valid in SVG presentation attributes, so colours and fonts go through style.
+  var STYLE = { fill: 1, stroke: 1, "font-family": 1, "fill-opacity": 0 };
+  function el(tag, attrs, parent, text) {
+    var n = document.createElementNS(NS, tag), css = "";
+    for (var k in attrs) {
+      if (STYLE[k] && String(attrs[k]).indexOf("var(") === 0) css += k + ":" + attrs[k] + ";";
+      else n.setAttribute(k, attrs[k]);
+    }
+    if (css) n.setAttribute("style", css);
+    if (text != null) n.textContent = text;
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  var C = { ink: "var(--ink)", muted: "var(--muted)", rule: "var(--rule)", lead: "var(--lead)", codex: "var(--codex)", oc: "var(--oc)", warn: "var(--warn)", wash: "var(--wash)", paper: "var(--paper)", mono: "var(--f-mono)" };
+
+  (function spend() {
+    var s = document.getElementById("spend"), w = 680, total = 26.46, kimi = 22.43, kw = w * kimi / total;
+    el("rect", { x: 0, y: 32, width: kw, height: 34, fill: C.warn, rx: 3 }, s);
+    el("rect", { x: kw + 2, y: 32, width: w - kw - 2, height: 34, fill: C.oc, rx: 3 }, s);
+    el("text", { x: 0, y: 20, fill: C.ink, "font-size": 14, "font-weight": 700 }, s, "Kimi K2.7 · $22.43");
+    el("text", { x: w, y: 20, fill: C.muted, "font-size": 14, "text-anchor": "end" }, s, "all other models · $4.03");
+    el("text", { x: 12, y: 54, fill: C.paper, "font-size": 14, "font-weight": 700 }, s, "85%");
+    el("text", { x: 0, y: 92, fill: C.muted, "font-size": 13 }, s, "$0");
+    el("text", { x: w, y: 92, fill: C.muted, "font-size": 13, "text-anchor": "end" }, s, "$26.46 · one week of OpenCode spend");
+  })();
+
+  (function cost() {
+    var s = document.getElementById("cost");
+    var rows = [["gpt-6-luna", .023, 5], ["mimo-v2.6-flash", .028, 5], ["qwen3.8-flash", .046, 5], ["glm-5.3-flash", .047, 5],
+                ["qwen3.7-plus", .081, 4], ["minimax-m3", .106, 5], ["kimi-k2.7-code", .273, 4]];
+    var left = 150, right = 560, max = 0.30, top = 10, rh = 34;
+    function X(v) { return left + (right - left) * v / max; }
+    [0, .1, .2, .3].forEach(function (t) {
+      el("line", { x1: X(t), x2: X(t), y1: top, y2: top + rows.length * rh, stroke: C.rule, "stroke-width": 1 }, s);
+      el("text", { x: X(t), y: top + rows.length * rh + 18, fill: C.muted, "font-size": 12, "text-anchor": "middle" }, s, "$" + t.toFixed(2));
+    });
+    rows.forEach(function (r, i) {
+      var y = top + i * rh, col = r[0] === "kimi-k2.7-code" ? C.warn : (r[0] === "minimax-m3" ? C.muted : C.codex);
+      el("text", { x: left - 12, y: y + 21, fill: C.ink, "font-size": 13.5, "text-anchor": "end" }, s, r[0]);
+      el("rect", { x: left, y: y + 7, width: Math.max(2, X(r[1]) - left), height: 20, fill: col, rx: 2 }, s);
+      el("text", { x: X(r[1]) + 8, y: y + 21, fill: C.ink, "font-size": 13, "font-weight": 700 }, s, "$" + r[1].toFixed(3) + "  ");
+      el("text", { x: X(r[1]) + 62, y: y + 21, fill: C.muted, "font-size": 12.5 }, s, r[2] + "/5" + (r[0] === "minimax-m3" ? " · fails real edits" : ""));
+    });
+    el("text", { x: left, y: top + rows.length * rh + 40, fill: C.muted, "font-size": 12 }, s, "USD to run all five tasks once");
+  })();
+
+  (function ctx() {
+    var s = document.getElementById("ctx"), n = 60, base = 20, step = 4, bounds = [15, 30, 45];
+    var a = [], b = [], cur = base;
+    for (var i = 1; i <= n; i++) { a.push(base + step * i); cur = bounds.indexOf(i - 1) >= 0 ? base + step : cur + step; b.push(cur); }
+    var L = 48, R = 664, T = 12, B = 236, ymax = 280;
+    function X(i) { return L + (R - L) * (i - 1) / (n - 1); }
+    function Y(v) { return B - (B - T) * v / ymax; }
+    [0, 100, 200].forEach(function (t) {
+      el("line", { x1: L, x2: R, y1: Y(t), y2: Y(t), stroke: C.rule }, s);
+      el("text", { x: L - 8, y: Y(t) + 4, fill: C.muted, "font-size": 12, "text-anchor": "end" }, s, t + "K");
+    });
+    function path(arr, close) {
+      var d = "M" + X(1) + "," + Y(arr[0]);
+      for (var i = 1; i < arr.length; i++) d += "L" + X(i + 1) + "," + Y(arr[i]);
+      if (close) d += "L" + X(n) + "," + B + "L" + X(1) + "," + B + "Z";
+      return d;
+    }
+    el("path", { d: path(a, true), fill: C.warn, "fill-opacity": 0.13 }, s);
+    el("path", { d: path(b, true), fill: C.lead, "fill-opacity": 0.25 }, s);
+    el("path", { d: path(a), fill: "none", stroke: C.warn, "stroke-width": 2.5 }, s);
+    el("path", { d: path(b), fill: "none", stroke: C.lead, "stroke-width": 2.5 }, s);
+    el("line", { x1: L, x2: R, y1: Y(200), y2: Y(200), stroke: C.muted, "stroke-dasharray": "4 4" }, s);
+    el("text", { x: L + 6, y: Y(200) - 6, fill: C.muted, "font-size": 12 }, s, "200K limit we set");
+    bounds.forEach(function (i, k) { el("text", { x: X(i), y: B + 17, fill: C.muted, "font-size": 11, "text-anchor": "middle" }, s, "task " + (k + 1) + " done"); });
+    el("text", { x: L, y: B + 38, fill: C.muted, "font-size": 12 }, s, "call 1");
+    el("text", { x: R, y: B + 38, fill: C.muted, "font-size": 12, "text-anchor": "end" }, s, "call 60");
+    var sa = a.reduce(function (p, c) { return p + c; }, 0), sb = b.reduce(function (p, c) { return p + c; }, 0);
+    document.getElementById("ctxsave").textContent = Math.round(100 * sb / sa) + "% as many tokens: " + (sb / 1000).toFixed(1) + "M instead of " + (sa / 1000).toFixed(1) + "M";
+  })();
+
+  (function shrink() {
+    var s = document.getElementById("shrink"), L = 70, R = 664, max = 320;
+    function X(v) { return L + (R - L) * v / max; }
+    el("line", { x1: X(80), x2: X(80), y1: 8, y2: 104, stroke: C.muted, "stroke-dasharray": "2 4" }, s);
+    el("line", { x1: X(200), x2: X(200), y1: 8, y2: 104, stroke: C.muted, "stroke-dasharray": "5 4" }, s);
+    el("text", { x: L - 10, y: 36, fill: C.ink, "font-size": 13.5, "text-anchor": "end" }, s, "before");
+    el("rect", { x: L, y: 18, width: X(310) - L, height: 28, fill: C.warn, rx: 3 }, s);
+    el("text", { x: X(310) - 10, y: 37, fill: C.paper, "font-size": 13, "font-weight": 700, "text-anchor": "end" }, s, "310K tokens");
+    el("text", { x: L - 10, y: 82, fill: C.ink, "font-size": 13.5, "text-anchor": "end" }, s, "after");
+    el("rect", { x: L, y: 64, width: X(31.6) - L, height: 28, fill: C.lead, rx: 3 }, s);
+    el("text", { x: X(31.6) + 10, y: 83, fill: C.ink, "font-size": 13, "font-weight": 700 }, s, "31.6K, same session");
+    el("text", { x: X(80), y: 124, fill: C.muted, "font-size": 12, "text-anchor": "middle" }, s, "40%: compact at next boundary");
+    el("text", { x: X(200), y: 124, fill: C.muted, "font-size": 12, "text-anchor": "middle" }, s, "200K limit");
+  })();
+
+  (function fan() {
+    var s = document.getElementById("fan");
+    function box(x, y, w, h, title, sub, col) {
+      el("rect", { x: x, y: y, width: w, height: h, rx: 8, fill: C.wash, stroke: col || C.rule, "stroke-width": col ? 2 : 1 }, s);
+      el("text", { x: x + 16, y: y + 26, fill: col || C.ink, "font-size": 16, "font-weight": 700 }, s, title);
+      el("text", { x: x + 16, y: y + 47, fill: C.muted, "font-size": 13, "font-family": C.mono }, s, sub);
+    }
+    var ys = [8, 86, 164];
+    [C.lead, C.oc, C.codex].forEach(function (col, i) {
+      el("path", { d: "M280,116 C390,116 380," + (ys[i] + 30) + " 490," + (ys[i] + 30), fill: "none", stroke: col, "stroke-width": 2 }, s);
+    });
+    box(20, 82, 260, 68, "One source folder", "~/.agents/pstack/local");
+    el("text", { x: 385, y: 108, fill: C.muted, "font-size": 13, "text-anchor": "middle", "font-family": C.mono }, s, "sync.py");
+    box(490, ys[0], 210, 60, "Claude", "~/.claude/skills", C.lead);
+    box(490, ys[1], 210, 60, "OpenCode", "~/.claude/skills", C.oc);
+    box(490, ys[2], 210, 60, "Codex", "~/.codex/skills", C.codex);
+    el("text", { x: 726, y: 34, fill: C.ink, "font-size": 14 }, s, "loads a skill when the task");
+    el("text", { x: 726, y: 52, fill: C.ink, "font-size": 14 }, s, "matches its description");
+    el("text", { x: 726, y: 112, fill: C.muted, "font-size": 13 }, s, "sync.py --check compares");
+    el("text", { x: 726, y: 130, fill: C.muted, "font-size": 13 }, s, "all copies, then each agent's");
+    el("text", { x: 726, y: 148, fill: C.muted, "font-size": 13 }, s, "debug listing confirms the load");
+  })();
+
+  (function router() {
+    var form = document.getElementById("rt"), pool = document.getElementById("pool");
+    function val(name) { var c = form.querySelector('input[name="' + name + '"]:checked'); return c ? c.value : null; }
+    function render() {
+      var kind = val("kind"), fail = val("fail"), att = +val("att"), p = +pool.value;
+      document.getElementById("poolv").textContent = p + "%";
+      var trail = [], big, why, col = C.ink, strong = false;
+      if (att > 3) { trail.push("attempt cap"); big = "Strongest model, high effort, then stop"; why = "Three tries are enough. One last attempt on the best model; if that fails, a human decides."; col = C.warn; }
+      else {
+        trail.push("attempt " + att + " ok");
+        if (fail === "context") { trail.push("cause: brief"); big = "Same agent, same model, better brief"; why = "A bigger model doesn't fix unclear instructions. The lead rewrites the brief instead."; col = C.lead; }
+        else {
+          if (fail === "capability") { trail.push("cause: capability"); strong = true; } else trail.push("no failure");
+          if (kind === "trivial") { trail.push("trivial"); big = "The lead does it"; why = "Writing a brief would cost more than making the change."; col = C.lead; }
+          else if (kind === "review") { trail.push("review"); big = "Codex · gpt-6.1-sol · high effort"; why = "Reviews go to a different vendor than the author, on its strongest model."; col = C.codex; }
+          else if (kind === "architecture") { trail.push("design"); big = "Claude, the lead"; why = "Design decisions stay with the agent that owns the plan."; col = C.lead; }
+          else {
+            trail.push("pool " + p + "%");
+            if (p < 85) {
+              trail.push(strong ? "tier: strong" : "tier: default");
+              big = strong ? "OpenCode · kimi-k2.7-code" : "OpenCode · glm-5.3-flash, warm pane";
+              why = strong ? "The last model wasn't capable enough, so this goes one step up the ladder, still on the cheap plan." : "Cheapest capable model. The implementer pane already runs it and knows the code, so the task goes there.";
+              col = C.oc;
+            } else {
+              trail.push("pool near limit", "fallback: codex");
+              big = strong ? "Codex · gpt-6.1-sol · medium" : "Codex · gpt-6-luna · medium";
+              why = "OpenCode is close to its limit, so the work moves to Codex in its own visible window. Claude stays reserved for judgment.";
+              col = C.codex;
+            }
+          }
+        }
+      }
+      var b = document.getElementById("rt-big"); b.textContent = big; b.style.color = col;
+      document.getElementById("rt-why").textContent = why;
+      var tr = document.getElementById("rt-trail"); tr.textContent = "";
+      trail.forEach(function (t) { var sp = document.createElement("span"); sp.textContent = t; tr.appendChild(sp); });
+      var end = document.createElement("span"); end.className = "end"; end.style.color = col; end.textContent = "→ route"; tr.appendChild(end);
+    }
+    form.addEventListener("change", render); pool.addEventListener("input", render);
+    render();
+  })();
+})();
+</script>
+
+</body>
+</html>

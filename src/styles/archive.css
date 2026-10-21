@@ -1,0 +1,188 @@
+.archive-page {
+  width: min(100%, calc(1424px + var(--gutter) + var(--gutter)));
+  margin-inline: auto;
+  padding: 0 var(--gutter) 2rem;
+}
+
+.archive-head {
+  padding: clamp(3.5rem, 9vw, 7.5rem) 0 3rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.archive-kicker,
+.archive-when {
+  color: var(--accent);
+  font: 0.6875rem/1.5 var(--font-mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.archive-head h1 {
+  margin: 0.65rem 0 1.1rem;
+  font: 700 clamp(2.75rem, 7vw, 5.5rem)/0.98 var(--font-sans);
+  letter-spacing: -0.06em;
+}
+
+.archive-intro {
+  max-width: 63ch;
+  color: var(--ink);
+  font: clamp(1.25rem, 2.4vw, 1.625rem)/1.4 var(--font-serif);
+  letter-spacing: -0.015em;
+}
+
+.archive-paper-link {
+  margin-top: 1.5rem;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.archive-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.6vw, 2.75rem) clamp(1rem, 1.8vw, 1.75rem);
+  padding-top: 2rem;
+}
+
+.archive-card {
+  min-width: 0;
+}
+
+.archive-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+}
+
+.archive-print {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: var(--tint);
+  box-shadow: 0 14px 44px rgb(0 0 0 / 0.45);
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2) ease;
+}
+
+.archive-print img {
+  width: 100%;
+  aspect-ratio: 1.42;
+  object-fit: contain;
+  filter: brightness(0.94);
+}
+
+.archive-open:hover .archive-print,
+.archive-open:focus-visible .archive-print {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+.archive-caption {
+  padding: 0.85rem 0.1rem 0;
+}
+
+.archive-caption h2 {
+  margin: 0.35rem 0 0.5rem;
+  font: 650 clamp(1.05rem, 1.6vw, 1.3rem)/1.2 var(--font-sans);
+  letter-spacing: -0.035em;
+}
+
+.archive-verdict {
+  max-width: 43ch;
+  color: var(--muted);
+  font: 0.975rem/1.55 var(--font-serif);
+}
+
+.archive-dialog {
+  width: min(94vw, 1500px);
+  max-width: none;
+  max-height: 92svh;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 90px rgb(0 0 0 / 0.65);
+}
+
+.archive-dialog::backdrop {
+  background: rgb(0 0 0 / 0.78);
+}
+
+.archive-dialog-inner {
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.archive-dialog img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 76svh;
+  margin-inline: auto;
+  border: 1px solid var(--rule);
+  box-shadow: 0 14px 44px rgb(0 0 0 / 0.4);
+}
+
+.archive-dialog-caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  margin-top: 0.85rem;
+  font: 600 1rem/1.4 var(--font-sans);
+}
+
+.archive-close {
+  margin-top: 0.9rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font: 0.75rem/1 var(--font-mono);
+  cursor: pointer;
+}
+
+.archive-close:hover {
+  border-color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .archive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .archive-page {
+    width: 100%;
+  }
+
+  .archive-head {
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+  }
+
+  .archive-intro br {
+    display: none;
+  }
+
+  .archive-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .archive-print img {
+    aspect-ratio: 1.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-print {
+    transition: none;
+  }
+}

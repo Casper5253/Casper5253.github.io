@@ -1,0 +1,93 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Stage } from '../../data/stages';
+import { PROFILE } from '../../data/profile';
+import ArtifactStack from './ArtifactStack.astro';
+import Diagram from './Diagram.astro';
+import ProjectCard from './ProjectCard.astro';
+import { href } from '../site/url';
+
+interface Props {
+  stage: Stage;
+  index: number;
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { stage, index, projects } = Astro.props;
+const orderedProjects = projects
+  .filter((project) => project.data.home?.chapter === stage.id)
+  .sort((first, second) => first.data.order - second.data.order);
+const showcases = orderedProjects.filter((project) => project.data.home?.diagram || project.data.home?.stack?.length);
+const cards = orderedProjects.filter((project) => !project.data.home?.diagram && !project.data.home?.stack?.length);
+---
+
+<section class="chapter" id={stage.id} data-chapter={stage.id} data-tone={stage.id} aria-labelledby={`heading-${stage.id}`}>
+  <div class="chapter-heading">
+    <p class="eyebrow">Chapter {String(index + 1).padStart(2, '0')}</p>
+    <h2 id={`heading-${stage.id}`} tabindex="-1">{stage.title}</h2>
+    <p class="chapter-line">{stage.line}</p>
+  </div>
+
+  <div class="chapter-body">
+    {stage.body.map((paragraph) => <p>{paragraph}</p>)}
+    <div class="lesson">
+      <p class="lesson-label">What I've learned</p>
+      <p>{stage.learned}</p>
+    </div>
+  </div>
+
+  {showcases.length > 0 && (
+    <div class="chapter-evidence">
+      {showcases.map((project) => (
+        <div class="project-showcase">
+          {project.data.home?.diagram && <Diagram diagram={project.data.home.diagram} project={project} />}
+          {project.data.home?.stack && project.data.home.stack.length > 0 && (
+            <>
+              <div class="artifact-stacks">
+                <ArtifactStack stageId={stage.id} project={project} itemIds={project.data.home.stack} caseLink={!project.data.home?.diagram} />
+              </div>
+              <div class="field-zone" data-field-zone aria-hidden="true"></div>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {cards.length > 0 && (
+    <div class:list={['chapter-work-row', { 'with-field-zone': !showcases.some((project) => project.data.home?.stack?.length) }]}>
+      <div class="chapter-work">
+        <div class="evidence-heading">
+          <h3>The work behind it</h3>
+          <span aria-hidden="true">↘</span>
+        </div>
+        <div class="project-grid">
+          {cards.map((project) => <ProjectCard project={project} />)}
+        </div>
+      </div>
+      {!showcases.some((project) => project.data.home?.stack?.length) && <div class="field-zone work-field-zone" data-field-zone aria-hidden="true"></div>}
+    </div>
+  )}
+
+  {stage.id === 'learn' && (
+    <>
+      <p class="also-exploring"><span>Also exploring</span>{PROFILE.alsoExploring.join(' · ')}</p>
+      <section class="closing" aria-labelledby="closing-heading">
+        <div>
+          <p class="eyebrow">Looking ahead</p>
+          <h3 id="closing-heading">{PROFILE.closing.heading}</h3>
+          <p class="closing-body">{PROFILE.closing.body}</p>
+        </div>
+        <div class="closing-contact">
+          <p>{PROFILE.closing.invite}</p>
+          <a class="email-link" href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+          <nav aria-label="More about Casper">
+            <a href={href('/about/')}>About &amp; CV</a>
+            <a href={PROFILE.links.github} rel="noopener">GitHub</a>
+            <a href={PROFILE.links.linkedin} rel="noopener">LinkedIn</a>
+          </nav>
+        </div>
+      </section>
+    </>
+  )}
+</section>

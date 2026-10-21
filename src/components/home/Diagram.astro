@@ -1,0 +1,94 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { DiagramId } from '../../data/stages';
+import { href } from '../site/url';
+
+interface Props {
+  diagram: DiagramId;
+  project: CollectionEntry<'projects'>;
+}
+
+const { diagram, project } = Astro.props;
+const diagrams: Record<DiagramId, {
+  eyebrow: string;
+  heading: string;
+  caption: string;
+  role?: string;
+  steps: { title: string; detail: string; tag?: string }[];
+}> = {
+  knowledge: {
+    eyebrow: 'From a recent engagement',
+    heading: 'Building a graph-enriched knowledge base',
+    caption: 'Current client work. Nothing from the client is shown.',
+    role: 'My role: AI engineer in a large programme team, building parts of the solution, mainly the front end and the screens shaped by client requirements.',
+    steps: [
+      { title: 'Unstructured information', detail: 'documents, records and know-how spread across teams' },
+      { title: 'Ontology and knowledge graph', detail: "the organisation's concepts, and how its information connects" },
+      { title: 'The knowledge base', detail: 'screens shaped by what the client needs from them', tag: 'my focus' },
+      { title: 'Tools built on it', detail: 'conversational applications and bespoke business interfaces', tag: 'still to come' },
+    ],
+  },
+  'quantlab-journey': {
+    eyebrow: 'QuantLab',
+    heading: 'From idea to verified prototype in one day',
+    caption: 'One working day, 11:35 to 18:09. A proof of concept, not a production system; the article explains the research.',
+    role: 'My role: the brief, the ambition and the design calls. A team of AI agents wrote the code.',
+    steps: [
+      { title: 'Idea', detail: 'a one-page brief: a research lab that tells you whether you actually know anything', tag: '11:35' },
+      { title: 'Design', detail: 'a plan, the rules and pass criteria written before any data ran, the work split across four agents', tag: 'by noon' },
+      { title: 'Working prototype', detail: 'first result at 12:50, reproduced exactly; by mid-afternoon 13 strategies on 73 funds and 16 years of prices', tag: '12:50' },
+      { title: 'Verification and controls', detail: 'a second engine written blind agrees with the first; data frozen under a hash; the runner refuses uncommitted code', tag: 'built in from the first hour' },
+      { title: 'Next, towards scale', detail: 'longer price history, combined strategies, a held-out test set and an evidence pack', tag: 'not started' },
+    ],
+  },
+  dq: {
+    eyebrow: 'GenAI data-quality tool · client work in the Netherlands',
+    heading: 'Five steps a person can check and correct',
+    caption: 'How the GenAI data-quality tool works',
+    role: 'My role: technical lead and client demonstrations, in a shared project team.',
+    steps: [
+      { title: '1 Sample', detail: 'about 3% of the dataset' },
+      { title: '2 Describe', detail: 'columns, formats, types, purpose and primary key' },
+      { title: '3 Require', detail: 'plain-English requirements across the six DAMA-DMBOK dimensions' },
+      { title: '4 Generate', detail: 'executable code for each check' },
+      { title: '5 Extend', detail: 'business and plausibility checks, including joins and whole-table logic' },
+    ],
+  },
+  crisis: {
+    eyebrow: 'Crisis simulation generator · client work in the Netherlands',
+    heading: 'From a spreadsheet to exercises a team runs',
+    caption: 'How the crisis simulation generator works',
+    role: 'My role: part of the team that built it.',
+    steps: [
+      { title: 'A spreadsheet', detail: 'what each scenario has to include' },
+      { title: 'The generator', detail: 'a Python and Streamlit app using the ChatGPT API' },
+      { title: 'Scenario material', detail: 'a detailed script or case written into each cell' },
+      { title: 'Adopted', detail: 'the receiving team prepared its exercises with it instead of by hand' },
+    ],
+  },
+};
+
+const content = diagrams[diagram];
+const diagramId = `diagram-${diagram}`;
+---
+
+<figure class="concept-diagram" data-artifact-plane data-project={project.id} aria-labelledby={`${diagramId}-heading`} aria-describedby={`${diagramId}-caption`}>
+  <div class="diagram-heading">
+    <div>
+      <p class="diagram-label">{content.eyebrow}</p>
+      <h3 class="diagram-title" id={`${diagramId}-heading`}>{content.heading}</h3>
+    </div>
+    {project.data.caseStudy && <a href={href(`/work/${project.id}/`)}>Case study<span class="vh">: {project.data.title}</span></a>}
+  </div>
+  {content.role && <p class="diagram-role">{content.role}</p>}
+  <ol class="diagram-steps">
+    {content.steps.map((step) => (
+      <li>
+        <h3>{step.title}</h3>
+        <p>{step.detail}</p>
+        {step.tag && <span class="diagram-tag">{step.tag}</span>}
+      </li>
+    ))}
+  </ol>
+  <figcaption id={`${diagramId}-caption`}>{content.caption}</figcaption>
+</figure>

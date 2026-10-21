@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { archive } from '../data/archive';
+import { href } from '../components/site/url';
+import '../styles/archive.css';
+
+const paperHref = href('/writing/how-this-site-was-built/index.html');
+---
+
+<Base
+  title="The graveyard"
+  description="A small archive of earlier versions of Casper van Tongeren's portfolio, and why each direction changed."
+>
+  <div class="archive-page">
+    <header class="archive-head">
+      <p class="archive-kicker">A small record of what came before</p>
+      <h1>The graveyard</h1>
+      <p class="archive-intro">
+        About forty versions of this site existed before this one.<br />
+        Here are some of them, with the reason each one was let go.
+      </p>
+    </header>
+
+    <section class="archive-grid" aria-label="Earlier versions of the site">
+      {archive.map((entry) => (
+        <figure class="archive-card">
+          <button
+            class="archive-open"
+            type="button"
+            data-archive-open={entry.id}
+            aria-haspopup="dialog"
+            aria-label={`Open larger image: ${entry.name}, ${entry.when}`}
+          >
+            <span class="archive-print">
+              <Image
+                src={entry.image}
+                alt={`${entry.name}, ${entry.when}`}
+                widths={[480, 960, entry.image.width]}
+                sizes="(min-width: 1100px) 29vw, (min-width: 700px) 45vw, 92vw"
+                loading="lazy"
+              />
+            </span>
+          </button>
+          <figcaption class="archive-caption">
+            <p class="archive-when">{entry.when}</p>
+            <h2>{entry.name}</h2>
+            <p class="archive-verdict">{entry.verdict}</p>
+          </figcaption>
+          <dialog class="archive-dialog" data-archive-dialog={entry.id} aria-label={entry.name}>
+            <div class="archive-dialog-inner">
+              <Image
+                src={entry.image}
+                alt={`${entry.name}, ${entry.when}`}
+                width={entry.image.width}
+                height={entry.image.height}
+                loading="eager"
+              />
+              <div class="archive-dialog-caption">
+                <p class="archive-when">{entry.when}</p>
+                <p>{entry.name}</p>
+              </div>
+              <button class="archive-close" type="button" data-archive-close>Close</button>
+            </div>
+          </dialog>
+        </figure>
+      ))}
+    </section>
+    <p class="archive-paper-link"><a href={paperHref}>Read the paper: How this site was built</a></p>
+  </div>
+</Base>
+
+<script>
+  for (const opener of document.querySelectorAll<HTMLButtonElement>('[data-archive-open]')) {
+    const id = opener.dataset.archiveOpen;
+    const dialog = document.querySelector<HTMLDialogElement>(`[data-archive-dialog="${id}"]`);
+    if (!dialog) continue;
+
+    opener.addEventListener('click', () => dialog.showModal());
+    dialog.addEventListener('close', () => opener.focus());
+    dialog.querySelector('[data-archive-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>

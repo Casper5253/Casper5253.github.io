@@ -1,0 +1,52 @@
+/*
+ * Design tokens. Night palette only (approved in Phase 2.6).
+ * The page takes the active chapter's palette through html[data-chapter]; a chapter section carries its own
+ * accent through [data-tone] so its title keeps its colour while the page is still in the previous chapter.
+ * scripts/contrast.mjs checks every text and accent colour here against every paper colour.
+ */
+:root {
+  color-scheme: dark;
+  --ink: #f3eee4;
+  --muted: #d1cbc0;
+  --quiet: #a9a39a;
+  --rule: #414744;
+  --print-bg: #f6f3ed;
+
+  --paper: #0d0e12;
+  --tint: #241612;
+  --accent: #ff795f;
+
+  --font-sans: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: Consolas, 'SF Mono', Menlo, 'DejaVu Sans Mono', monospace;
+  --heading: var(--font-sans);
+
+  --header-h: 76px;
+  --gutter: 5.5vw;
+  --max: 1424px;
+
+  /* Motion: one table for the whole site. Exits run about 20% faster than entrances. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 300ms;
+  --dur-colour: 450ms;
+}
+
+:root[data-chapter='opening'] { --paper: #0d0e12; --tint: #241612; --accent: #ff795f; }
+:root[data-chapter='understand'] { --paper: #071713; --tint: #11261f; --accent: #65d9bf; }
+:root[data-chapter='build'] { --paper: #160d0b; --tint: #2b1711; --accent: #ff7f66; }
+:root[data-chapter='refine'] { --paper: #100d19; --tint: #211a35; --accent: #b7a5ff; }
+:root[data-chapter='deliver'] { --paper: #0b150b; --tint: #182719; --accent: #a4dc8c; }
+:root[data-chapter='learn'] { --paper: #190f0a; --tint: #2b1b12; --accent: #ff9b65; }
+
+[data-tone='understand'] { --accent: #65d9bf; --tint: #11261f; --heading: var(--font-mono); }
+[data-tone='build'] { --accent: #ff7f66; --tint: #2b1711; --heading: var(--font-serif); }
+[data-tone='refine'] { --accent: #b7a5ff; --tint: #211a35; --heading: var(--font-sans); }
+[data-tone='deliver'] { --accent: #a4dc8c; --tint: #182719; --heading: var(--font-mono); }
+[data-tone='learn'] { --accent: #ff9b65; --tint: #2b1b12; --heading: var(--font-serif); }
+
+@media (max-width: 600px) {
+  :root { --header-h: 62px; --gutter: 20px; }
+}

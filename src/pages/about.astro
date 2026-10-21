@@ -1,0 +1,158 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { href } from '../components/site/url';
+import { STAGES } from '../data/stages';
+import { PROFILE } from '../data/profile';
+import { STATUSES } from '../content.config';
+import portrait from '../assets/portrait/casper.jpg';
+import '../styles/pages.css';
+
+const allProjects = await getCollection('projects');
+const projectById = new Map(allProjects.map((entry) => [entry.id, entry]));
+// The CV prints a short list of independent work, built from the same collection as the site.
+const selectedIds = ['hx', 'quantlab', 'agentmem', 'film'];
+const selectedWork = selectedIds
+  .map((id) => projectById.get(id))
+  .filter((entry) => entry && entry.data.caseStudy !== false)
+  .map((entry) => {
+    const data = entry!.data;
+    let url = data.repo;
+    if (!url && data.article) url = new URL(href(data.article.href), Astro.site).href;
+    if (!url) url = data.links.find((link) => link.url.startsWith('https://www.youtube.com'))?.url ?? PROFILE.links.film;
+    return { title: data.title, short: data.short, status: STATUSES[data.status], url: url! };
+  });
+---
+
+<Base title="About & CV" description={PROFILE.intro}>
+  <div class="page" data-tone="understand">
+    <header class="about-head">
+      <div class="frame no-print">
+        <Image
+          src={portrait}
+          alt="Portrait of Casper van Tongeren"
+          widths={[220, 440]}
+          sizes="(min-width: 900px) 220px, 42vw"
+        />
+      </div>
+      <div>
+        <p class="eyebrow">About</p>
+        <h1>{PROFILE.name}</h1>
+        <p class="byline lede">{PROFILE.intro}</p>
+        <p class="mono-note" style="margin-top: 1rem;">
+          {PROFILE.title} · {PROFILE.employer} · {PROFILE.location}
+        </p>
+        <p class="mono-note print-only">
+          {PROFILE.email} · {PROFILE.links.github.replace(/^https?:\/\//, '')} · {PROFILE.links.linkedin.replace(/^https?:\/\//, '')}
+        </p>
+        <p class="about-contact no-print">
+          <a class="cv-button" href={href('/cv/casper-van-tongeren-cv.pdf')} download>Download CV (PDF)</a>
+          <a href={`mailto:${PROFILE.email}`}>Email</a>
+          <a href={PROFILE.links.github}>GitHub</a>
+          <a href={PROFILE.links.linkedin}>LinkedIn</a>
+        </p>
+      </div>
+    </header>
+
+    <section class="about-section s-summary">
+      <h2>Summary</h2>
+      <div>
+      <p>{PROFILE.summary}</p>
+      </div>
+    </section>
+
+    <section class="about-section s-how">
+      <h2>How I work</h2>
+      <div class="how">
+        {STAGES.map((stage, i) => (
+          <a href={href(`/#${stage.id}`)}>
+            <span class="num">{String(i + 1).padStart(2, '0')}</span>
+            <span>
+              <h3>{stage.title}</h3>
+              <p>{stage.overview}</p>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="about-section s-experience">
+      <h2>Experience</h2>
+      <div class="xp">
+        {PROFILE.experience.map((job) => (
+          <div>
+            <div class="head">
+              <h3>{job.org}</h3>
+              <span class="place">{job.role} · {job.place}</span>
+              <span class="period">{job.period}</span>
+            </div>
+            {job.points.length > 0 && (
+              <ul>
+                {job.points.map((point) => (
+                  <li>{point}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="about-section s-selected print-only">
+      <h2>Selected independent work</h2>
+      <div class="selected-work">
+        {selectedWork.map((entry) => (
+          <div>
+            <p class="degree">{entry.title}</p>
+            <p class="selected-short">{entry.short}</p>
+            <p class="mono-note">{entry.status} · <a href={entry.url}>{entry.url.replace(/^https?:\/\//, '')}</a></p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="about-section s-education">
+      <h2>Education</h2>
+      <div class="edu">
+        {PROFILE.education.map((study) => (
+          <div>
+            <p class="degree">{study.degree}</p>
+            <p class="school">{study.school}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="about-section s-languages no-print">
+      <h2>Languages</h2>
+      <div>
+      <p>{PROFILE.languages.join(', ')}</p>
+      </div>
+    </section>
+
+    <section class="about-section s-skills">
+      <h2>Skills</h2>
+      <div class="skills">
+        {PROFILE.skills.map((group) => (
+          <div>
+            <p class="group">{group.group}</p>
+            <ul>
+              {group.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p class="mono-note print-only" style="margin-top: 6pt;">Languages: {PROFILE.languages.join(', ')}</p>
+    </section>
+
+    <section class="about-section s-outside">
+      <h2>Outside work</h2>
+      <div>
+      <p>{PROFILE.personal}</p>
+      </div>
+    </section>
+  </div>
+</Base>

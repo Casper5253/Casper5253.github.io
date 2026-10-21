@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://casper5253.github.io/sitemap-index.xml

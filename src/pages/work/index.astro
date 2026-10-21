@@ -1,0 +1,88 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { href } from '../../components/site/url';
+import { STATUSES } from '../../content.config';
+import { STAGES } from '../../data/stages';
+import { ARTIFACTS } from '../../data/artifacts';
+import { PROFILE } from '../../data/profile';
+import '../../styles/pages.css';
+
+const entries = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const stageOf = (id: string) => STAGES.find((stage) => stage.id === id);
+---
+
+<Base title="Work" description="Client work, things I built for myself, and a few made just to see if they could be.">
+  <div class="page" data-tone="refine">
+    <header class="work-head">
+      <p class="eyebrow">Work</p>
+      <h1>Work</h1>
+      <p class="lede">Client work, things I built for myself, and a few made just to see if they could be.</p>
+    </header>
+
+    <div class="work-list">
+      {entries.map((entry) => {
+        const data = entry.data;
+        const [firstArtifact] = data.artifacts;
+        const thumb = firstArtifact ? ARTIFACTS[firstArtifact] : undefined;
+        return (
+          <article class="work-card">
+            <div class="work-card-media">
+              {thumb ? (
+                <div class="frame">
+                  <Image
+                    src={thumb.image}
+                    alt={thumb.alt}
+                    widths={[300, 600]}
+                    sizes="(min-width: 900px) 300px, 100vw"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <p class="noimg">{data.noImage ?? ''}</p>
+              )}
+            </div>
+            <div>
+              <p class="work-meta">
+                <span class="kind">{data.kind}</span>
+                <span>{STATUSES[data.status]}</span>
+                <span>{data.period}</span>
+              </p>
+              <h2>
+                {data.caseStudy ? <a href={href(`/work/${entry.id}/`)}>{data.title}</a> : data.title}
+              </h2>
+              <p class="short">{data.short}</p>
+
+              {data.home && (
+                <p class="work-chips">
+                  <a class="chip" href={href(`/#${data.home.chapter}`)}>{stageOf(data.home.chapter)?.title ?? data.home.chapter}</a>
+                </p>
+              )}
+
+              <p class="work-links">
+                {data.caseStudy && <a href={href(`/work/${entry.id}/`)}>Case study</a>}
+                {data.article && <a href={href(data.article.href)}>Read the article</a>}
+                {data.repo && <a href={data.repo}>Public repository</a>}
+                {data.links.map((link) => (
+                  <a href={link.url}>{link.label}</a>
+                ))}
+              </p>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <section class="also">
+      <h2 class="label">Also exploring</h2>
+      <ul>
+        {PROFILE.alsoExploring.map((thing) => (
+          <li>{thing}</li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</Base>

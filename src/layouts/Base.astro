@@ -1,0 +1,59 @@
+---
+import '../styles/global.css';
+import Footer from '../components/site/Footer.astro';
+import Header from '../components/site/Header.astro';
+import { href } from '../components/site/url';
+
+interface Props {
+  title: string;
+  description: string;
+  home?: boolean;
+}
+
+const { title, description, home = false } = Astro.props;
+const fullTitle = title === 'Casper van Tongeren' ? title : `${title} · Casper van Tongeren`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/og.png`, Astro.site);
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Casper van Tongeren',
+  jobTitle: 'Senior Consultant, AI & Data',
+  email: 'mailto:casper5253@gmail.com',
+  url: new URL(import.meta.env.BASE_URL, Astro.site).href,
+  sameAs: ['https://github.com/Casper5253', 'https://www.linkedin.com/in/caspervtongeren'],
+  worksFor: { '@type': 'Organization', name: 'Deloitte' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Singapore' },
+};
+---
+
+<!doctype html>
+<html lang="en" data-chapter={home ? 'opening' : undefined}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    <meta name="theme-color" content="#0d0e12" />
+    <meta name="color-scheme" content="dark" />
+  </head>
+  <body>
+    <a class="skip-link" href={href('#main')}>Skip to content</a>
+    <Header home={home} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

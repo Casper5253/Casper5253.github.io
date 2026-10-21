@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.hx/
+*.log
+.DS_Store
+.artifacts/
+private/

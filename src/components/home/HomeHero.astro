@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../../assets/portrait/casper.jpg';
+import { PROFILE } from '../../data/profile';
+import { STAGES } from '../../data/stages';
+import { href } from '../site/url';
+---
+
+<section class="opening wrap" id="opening" aria-labelledby="opening-heading">
+  <div class="opening-top">
+    <div class="identity">
+      <figure class="portrait portrait-a">
+        <Image
+          src={portrait}
+          alt="Portrait of Casper van Tongeren"
+          width={portrait.width}
+          height={portrait.height}
+          sizes="(max-width: 600px) 120px, 230px"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+      <div class="identity-copy">
+        <p class="eyebrow"><span class="opening-role">{PROFILE.title}</span> · {PROFILE.employer}, {PROFILE.location}</p>
+        <h1 id="opening-heading" tabindex="-1">{PROFILE.name}</h1>
+      </div>
+      <p class="intro">{PROFILE.intro}</p>
+    </div>
+    <div class="opening-statement">
+      <p class="thesis">{PROFILE.thesis}</p>
+      <a class="start-link" href={href('/#understand')}>Follow the story <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+
+  <div class="opening-field-zone field-zone" data-field-zone aria-hidden="true"></div>
+
+  <nav class="overview" aria-label="The five chapters">
+    {STAGES.map((stage, index) => (
+      <a href={href(`/#${stage.id}`)} data-tone={stage.id}>
+        <span class="overview-number">{String(index + 1).padStart(2, '0')} <span aria-hidden="true">↘</span></span>
+        <h2>{stage.title}</h2>
+        <p>{stage.overview}</p>
+      </a>
+    ))}
+  </nav>
+</section>

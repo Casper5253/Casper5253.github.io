@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import HomeChapter from '../components/home/HomeChapter.astro';
+import HomeHero from '../components/home/HomeHero.astro';
+import Base from '../layouts/Base.astro';
+import { PROFILE } from '../data/profile';
+import { STAGES } from '../data/stages';
+import '../styles/home.css';
+
+const projects = (await getCollection('projects'))
+  .filter((project) => !project.data.draft)
+  .sort((first, second) => first.data.order - second.data.order);
+---
+
+<Base title={PROFILE.name} description={PROFILE.intro} home>
+  <HomeHero />
+  <div class="story">
+    {STAGES.map((stage, index) => (
+      <HomeChapter
+        stage={stage}
+        index={index}
+        projects={projects.filter((project) => project.data.home?.chapter === stage.id)}
+      />
+    ))}
+  </div>
+  <section class="outside-work wrap" aria-labelledby="outside-work-heading">
+    <p class="eyebrow" id="outside-work-heading">Outside work</p>
+    <p>{PROFILE.personal}</p>
+  </section>
+  <script src="../scripts/chapters.ts"></script>
+</Base>

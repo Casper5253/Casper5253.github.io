@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Would an Agentic AI Quant Researcher Do? | QuantLab</title>
+<meta name="description" content="Field report: one day, five AI models and me building a research lab that tests thirteen famous investing strategies honestly, with verification built in from the first hour.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What Would an Agentic AI Quant Researcher Do? | QuantLab">
+<meta property="og:description" content="Field report: one day, five AI models and me building a research lab that tests thirteen famous investing strategies honestly, with verification built in from the first hour.">
+<meta property="og:url" content="https://casper5253.github.io/writing/quantlab/">
+<meta property="og:image" content="https://casper5253.github.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root {
+  color-scheme: light;
+  --font-serif: Charter, 'Iowan Old Style', Georgia, serif;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Mono', Consolas, monospace;
+  --surface: #f6f2ea;
+  --text: #1d1c1a;
+  --text-secondary: #3b3a36;
+  --muted: #6b665b;
+  --grid: #e2dccf;
+  --border: #e2dccf;
+  --accent: #a0522d;
+  --series-1: #1f5fa8;
+  --series-2: #c0763a;
+  --verdict-supported: #2f7d4f;
+  --verdict-not-supported: #b3412f;
+  --verdict-inconclusive: #8a7a3c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  color-scheme: dark;
+  --surface: #1c1b19;
+  --text: #f0ece3;
+  --text-secondary: #c9c3b6;
+  --muted: #9d978a;
+  --grid: #33312c;
+  --border: #33312c;
+  --accent: #d08a5c;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --verdict-supported: #4fb07c;
+  --verdict-not-supported: #e0705c;
+  --verdict-inconclusive: #c9b46a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1c1b19;
+  --text: #f0ece3;
+  --text-secondary: #c9c3b6;
+  --muted: #9d978a;
+  --grid: #33312c;
+  --border: #33312c;
+  --accent: #d08a5c;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --verdict-supported: #4fb07c;
+  --verdict-not-supported: #e0705c;
+  --verdict-inconclusive: #c9b46a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--surface);
+  color: var(--text);
+  font: 17px/1.6 var(--font-serif);
+  overflow-x: hidden;
+}
+.wrap { max-width: 820px; margin: 0 auto; padding: 56px 24px 80px; }
+a { color: var(--series-1); }
+.kicker {
+  font: 600 12px/1 var(--font-ui); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent);
+}
+h1 { font: 700 46px/1.08 var(--font-serif); letter-spacing: -.01em; margin: 14px 0 18px; }
+h2 {
+  font: 700 15px/1.3 var(--font-ui); margin: 44px 0 12px;
+  padding-top: 14px; border-top: 2px solid var(--text);
+}
+h3 { font: 600 15px/1.3 var(--font-ui); margin: 24px 0 8px; }
+p { margin: 0 0 14px; }
+.lede, .headline {
+  font-size: 21px; line-height: 1.45; color: var(--text-secondary);
+  margin: 0 0 36px; max-width: 680px;
+}
+.headline { margin: 0 0 14px; }
+.meta { font: 13px/1.5 var(--font-ui); color: var(--muted); margin: 0 0 8px; }
+.meta a { color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 40px; }
+.tile { border-top: 2px solid var(--text); padding-top: 10px; }
+.tile b { display: block; font: 600 32px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.tile span { font: 13px/1.4 var(--font-ui); color: var(--muted); }
+.fig { margin: 0 0 40px; border-top: 2px solid var(--text); padding-top: 14px; }
+.fig h2 { border: 0; padding: 0; margin: 0 0 4px; }
+.fig p { font: 13px/1.5 var(--font-ui); color: var(--muted); margin: 0 0 14px; }
+.scoreboard svg { width: 100%; height: auto; display: block; }
+.scoreboard text { font-family: var(--font-ui); font-size: 13px; fill: var(--text-secondary); }
+.scoreboard .axis { font-size: 11px; fill: var(--muted); }
+.scoreboard .running { font-size: 12px; fill: var(--muted); }
+.scoreboard .glyph { font-size: 14px; font-weight: 600; fill: currentColor; }
+.rule {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+  color: var(--text); text-decoration: none; font-family: var(--font-ui);
+}
+a.rule:hover .txt { text-decoration: underline; }
+.rule .fam {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+}
+.rule .txt { font: 600 17px/1.35 var(--font-serif); }
+.rule .vd { font-size: 14px; text-align: right; white-space: nowrap; }
+.rule .det { grid-column: 2 / 4; text-align: right; font-size: 13px; color: var(--muted); }
+.rule.is-running .txt { color: var(--muted); }
+.verdict { font-weight: 600; }
+.verdict-supported { color: var(--verdict-supported); }
+.verdict-not-supported { color: var(--verdict-not-supported); }
+.verdict-inconclusive { color: var(--verdict-inconclusive); }
+.verdict-running { color: var(--muted); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 24px 0 8px; }
+.figures div { border-top: 1px solid var(--border); padding-top: 8px; }
+.figures b { display: block; font: 600 18px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; }
+.figures span { font: 12px/1.4 var(--font-ui); color: var(--muted); }
+.badge {
+  display: inline-block; padding: 1px 6px; border: 1px solid var(--border);
+  font: 600 12px/1.5 var(--font-ui); color: var(--muted);
+}
+blockquote {
+  margin: 8px 0 16px; padding: 0 0 0 16px; border-left: 3px solid var(--accent);
+  color: var(--text-secondary); font-size: 19px; line-height: 1.5;
+}
+.plain-lead { font: 400 21px/1.45 var(--font-serif); color: var(--text-secondary); margin: 8px 0 18px; }
+.registered-label { font: 600 12px/1.4 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+.registered { font-size: 16px; color: var(--muted); margin-top: 0; }
+.prose-sentence { margin: 0 0 10px; }
+.explanation { font: 13px/1.5 var(--font-ui); color: var(--muted); margin: 4px 0 0; }
+.warning { border: 2px solid var(--text); padding: 12px; font: 600 15px/1.4 var(--font-ui); margin: 8px 0; }
+.chart-container { margin: 24px 0; }
+.chart-container svg { width: 100%; height: auto; display: block; }
+.chart-container svg text, .rangebar svg text { font-family: var(--font-mono); }
+.chart-legend { font: 13px/1.4 var(--font-ui); margin: 6px 0; color: var(--text-secondary); }
+.chart-legend span { margin-right: 18px; font-weight: 600; }
+.rangebar { margin: 12px 0; }
+.rangebar svg { width: 100%; height: auto; display: block; }
+.heat-strip { margin: 8px 0; overflow-x: auto; }
+.table-wrap { overflow-x: auto; margin: 8px 0 16px; }
+table { width: 100%; border-collapse: collapse; font: 14px/1.4 var(--font-ui); }
+th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 600; border-bottom: 2px solid var(--text); }
+.provenance { font-size: 13px; }
+.provenance td { overflow-wrap: anywhere; }
+details { margin: 8px 0 14px; font: 14px/1.5 var(--font-ui); }
+summary { cursor: pointer; color: var(--muted); font-weight: 600; }
+details.specialists { border: 1px solid var(--border); padding: 12px 18px; margin: 48px 0 0; }
+.nav { display: flex; flex-wrap: wrap; gap: 8px 18px; font: 14px var(--font-ui); margin: 0 0 36px; }
+.nav a { color: var(--text-secondary); text-decoration: none; }
+.timeline { list-style: none; margin: 8px 0 16px; font: 14px/1.5 var(--font-ui); }
+.timeline li { padding: 10px 0 10px 16px; border-left: 2px solid var(--border); margin-left: 4px; }
+.timeline .tl-ts { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.timeline .tl-unit { font-weight: 600; }
+.timeline .tl-findings { font-size: 13px; color: var(--muted); }
+pre {
+  white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: auto;
+  font: 13px/1.5 var(--font-mono); padding: 12px; border: 1px solid var(--border);
+}
+.overview { margin: 0 0 40px; }
+.overview p { font-size: 17px; line-height: 1.5; margin: 0 0 12px; max-width: 680px; }
+.overview b {
+  font: 600 12px/1.4 var(--font-ui); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--accent); margin-right: 6px;
+}
+.method p, .method ul { max-width: 680px; }
+.method ul { margin: 0 0 14px 20px; }
+.method li { margin-bottom: 6px; }
+.source { font: 12px/1.5 var(--font-ui); color: var(--muted); margin: -4px 0 18px; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+.refs { font: 12px/1.6 var(--font-ui); color: var(--muted); margin: 8px 0 0; overflow-wrap: anywhere; }
+.exhibit { border-top: 2px solid var(--text); padding-top: 14px; margin: 0 0 40px; }
+.exhibit h2 { border: 0; padding: 0; margin: 0 0 10px; }
+.parts dt { font: 600 12px/1.4 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-top: 10px; }
+.parts dd { margin: 2px 0 0; max-width: 680px; }
+.callout { border: 2px solid var(--text); padding: 14px 16px; margin: 0 0 28px; font: 15px/1.5 var(--font-ui); max-width: 680px; }
+.steps { list-style: none; margin: 0; padding: 0 0 0 4px; border-left: 2px solid var(--border); }
+.step { padding: 0 0 26px 20px; }
+.step h3 { margin: 6px 0 4px; }
+.step p { max-width: 680px; }
+.step-head { font: 13px/1.6 var(--font-ui); display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.chip { display: inline-block; padding: 0 8px; border: 1px solid currentColor; border-radius: 999px; font: 600 12px/1.6 var(--font-ui); }
+.chip-claude { color: var(--series-1); }
+.chip-codex { color: var(--series-2); }
+.chip-owner { color: var(--accent); }
+.chip-machine { color: var(--muted); }
+.chip-other { color: var(--text-secondary); }
+.kind { font: 600 11px/1.6 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.knowright { margin: 0 0 40px; }
+.knowright p { max-width: 680px; }
+@media (max-width: 640px) {
+  .wrap { padding: 36px 16px 60px; }
+  h1 { font-size: 34px; }
+  .lede, .headline { font-size: 19px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scoreboard-fig { display: none; }
+  .rule { grid-template-columns: minmax(0, 1fr) auto; }
+  .rule .vd { white-space: normal; }
+  .rule .fam { grid-column: 1 / 3; }
+  .rule .txt { grid-column: 1 / 2; }
+  .rule .vd { grid-column: 2 / 3; }
+  .rule .det { grid-column: 1 / 3; text-align: left; }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  table { font-size: 12px; }
+}
+
+:root { --c-lead: var(--series-1); --c-codex: var(--series-2); --c-oc: var(--verdict-supported); --c-relief: #8a6fc7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-relief: #b9a2ea; } }
+:root[data-theme="dark"] { --c-relief: #b9a2ea; }
+body { overflow-x: visible; }
+.paper { --figure-width: min(960px, calc(100vw - 48px)); max-width: 1008px; margin: auto; padding: 48px 24px 96px; }
+.paper > :not(figure), .prose { max-width: 680px; margin-inline: auto; }
+.paper > section > .exhibit, .prose > .exhibit { width: var(--figure-width); margin-left: calc((100% - var(--figure-width)) / 2); }
+.paper h1 { font-size: clamp(32px, 5vw, 52px); }
+.paper-head .kicker { margin-bottom: 18px; }
+.paper-head .lede { font-size: 22px; }
+.byline, .note, .foot, .sources { font: 13px/1.6 var(--font-ui); color: var(--text-secondary); }
+.byline { margin-bottom: 12px; }
+.owner { text-decoration: underline dotted color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: .22em; }
+.paper > section > h2, .prose h2 { font: 600 1.75rem/1.25 var(--font-serif); border: 0; padding: 0; margin: 48px 0 20px; }
+.prose ul, .prose ol, .paper > section > ul, .paper > section > ol { margin: 16px 0 20px 22px; }
+.prose li { margin-bottom: 9px; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+
+.numbers { --figure-width: min(960px, calc(100vw - 48px)); max-width: none !important; width: var(--figure-width); margin: 44px 0 56px calc((100% - var(--figure-width)) / 2) !important; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 26px; }
+.numbers > div { border-top: 1px solid var(--text); padding-top: 14px; min-width: 0; }
+.numbers b { display: block; font: 600 clamp(26px, 3.2vw, 40px)/1.1 var(--font-serif); font-variant-numeric: tabular-nums; }
+.numbers span { display: block; margin-top: 10px; font: 13px/1.5 var(--font-ui); color: var(--text-secondary); }
+
+.roles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 28px 0 24px; }
+.role { border-top: 2px solid var(--text); padding-top: 12px; min-width: 0; }
+.role p { font: 15px/1.6 var(--font-ui); margin: 10px 0 0; }
+.who { display: inline-block; font: 600 12px/1.4 var(--font-ui); text-transform: uppercase; letter-spacing: .06em; }
+.who.lead, .tl-row.lead { color: var(--c-lead); }
+.who.codex, .tl-row.codex { color: var(--c-codex); }
+.who.oc, .tl-row.oc { color: var(--c-oc); }
+.who.relief, .tl-row.relief { color: var(--c-relief); }
+
+.quote { font: italic 400 clamp(20px, 2.6vw, 26px)/1.45 var(--font-serif); border-left: 3px solid var(--accent); padding-left: 20px; margin: 28px 0; }
+.pull { font: 600 clamp(24px,3vw,32px)/1.35 var(--font-serif); border-left: 3px solid var(--accent); padding-left: 22px; margin: 38px 0; }
+.lessons { list-style: none; margin: 20px 0 !important; padding: 0; }
+.lessons li { padding: 18px 0; border-bottom: 1px solid var(--grid); }
+.lessons b, .lessons span { display: block; }
+.lessons span { margin-top: 8px; }
+hr.end { margin: 48px 0 24px; border: 0; border-top: 2px solid var(--text); }
+.foot { padding-top: 10px; }
+.sources { margin: 48px auto 0; padding-top: 12px; border-top: 1px solid var(--grid); }
+
+.exhibit { margin: 38px 0 56px; min-width: 0; border-top: 2px solid var(--text); padding-top: 16px; }
+.exhibit h3 { margin: 0 0 10px; font: 600 17px/1.3 var(--font-ui); }
+.figure-note, figcaption { color: var(--text-secondary); font: 13px/1.6 var(--font-ui); }
+figcaption { margin-top: 18px; overflow-wrap: anywhere; }
+
+.pass-control { margin: 8px 0 18px; }
+.segmented { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--text); border-radius: 999px; overflow: hidden; width: fit-content; max-width: 100%; }
+.seg { appearance: none; border: 0; border-right: 1px solid var(--text); background: transparent; color: var(--text); font: 600 14px/1.2 var(--font-ui); padding: 10px 16px; min-height: 44px; cursor: pointer; }
+.seg:last-child { border-right: 0; }
+.seg[aria-pressed=true] { background: var(--text); color: var(--surface); }
+.seg:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+.pass-count { font: 700 clamp(34px, 5vw, 48px)/1.1 var(--font-serif); margin: 22px 0 6px; font-variant-numeric: tabular-nums; }
+.pass-note { font: 15px/1.5 var(--font-ui); color: var(--text-secondary); margin: 0 0 14px; max-width: 60ch; }
+.pass-custom { border: 1px solid var(--grid); padding: 16px; margin: 14px 0 4px; font: 14px/1.6 var(--font-ui); }
+.pass-custom fieldset { border: 0; margin: 0 0 14px; padding: 0; }
+.pass-custom legend { font-weight: 600; margin-bottom: 6px; }
+.pass-custom label { display: block; margin: 8px 0; }
+.pass-custom input { accent-color: var(--series-1); }
+.pass-custom input[type=range] { width: 100%; min-height: 32px; }
+.pass-custom input[type=checkbox] { margin-right: 8px; width: 17px; height: 17px; vertical-align: middle; }
+.slider-label { display: flex !important; justify-content: space-between; }
+.pass-custom output { font-family: var(--font-mono); }
+.pass-list { list-style: none; margin: 18px 0 0; padding: 0; }
+.pass-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--grid); }
+.pass-name { font: 600 16px/1.35 var(--font-serif); min-width: 0; overflow-wrap: anywhere; }
+.pass-chip { font: 600 12px/1 var(--font-ui); text-transform: uppercase; letter-spacing: .06em; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+.pass-chip.yes { background: color-mix(in srgb, var(--verdict-supported) 18%, transparent); color: var(--verdict-supported); }
+.pass-chip.no { background: color-mix(in srgb, var(--verdict-not-supported) 14%, transparent); color: var(--verdict-not-supported); }
+.pass-marks { grid-column: 1 / 3; display: flex; flex-wrap: wrap; gap: 6px 18px; font: 12px/1.3 var(--font-ui); color: var(--text-secondary); }
+.gate { display: inline-flex; align-items: center; gap: 6px; }
+.gate b { font: 700 15px/1 var(--font-ui); width: 20px; text-align: center; }
+.gate.yes b { color: var(--verdict-supported); }
+.gate.no b { color: var(--verdict-not-supported); }
+.gate.off b { color: var(--muted); }
+.pass-numbers { margin: 22px 0 0; font: 14px/1.5 var(--font-ui); }
+.pass-numbers summary { cursor: pointer; font-weight: 600; color: var(--text); min-height: 44px; display: flex; align-items: center; }
+.pass-table th[scope=row] { font-weight: 400; min-width: 150px; }
+.pass-table td, .pass-table th { border-bottom: 1px solid var(--grid); padding: 8px 10px 8px 0; }
+.pass-table td { white-space: nowrap; }
+.table-scroll { overflow-x: auto; max-width: 100%; overscroll-behavior-inline: contain; }
+
+.parallel-timeline { --lane-width: 150px; margin-top: 18px; overflow: hidden; }
+.tl-row, .tl-axis { display: grid; grid-template-columns: var(--lane-width) minmax(0, 1fr); align-items: center; border-bottom: 1px solid var(--grid); }
+.tl-row { min-height: 40px; padding: 6px 0; }
+.tl-axis { border-bottom: 0; min-height: 26px; }
+.tl-label { font: 600 13px/1.3 var(--font-ui); color: var(--text); padding-right: 10px; }
+.tl-track { position: relative; height: 26px; min-width: 0; }
+.tl-row.owner-row .tl-track { height: 52px; }
+.tl-grid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.tl-bar { position: absolute; top: 9px; height: 8px; min-width: 4px; border-radius: 4px; opacity: .85; }
+.tl-bar.lead { background: var(--c-lead); }
+.tl-bar.codex { background: var(--c-codex); }
+.tl-bar.oc { background: var(--c-oc); }
+.tl-bar.relief { background: var(--c-relief); }
+.tl-who { position: absolute; top: 4px; font: 600 12px/1.3 var(--font-ui); white-space: nowrap; color: inherit; }
+.tl-who-left { text-align: right; }
+.tl-mark { position: absolute; top: 21px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--text); }
+.tl-mark-label { position: absolute; font: 600 12px/1.3 var(--font-ui); color: var(--text); max-width: 46%; white-space: normal; }
+.tl-mark-label.level-down { top: 0; }
+.tl-mark-label.level-up { top: 30px; }
+.tl-axis .tl-track span { position: absolute; top: 4px; transform: translateX(-50%); font: 11px var(--font-mono); color: var(--text-secondary); white-space: nowrap; }
+.tl-axis .tl-track span:first-child { transform: none; }
+.tl-axis .tl-track span:last-child { transform: translateX(-100%); }
+.tl-row.owner-row { border-bottom: 1px dashed var(--grid); }
+@media (max-width: 640px) {
+ .parallel-timeline { --lane-width: 84px; }
+ .tl-label { font-size: 12px; }
+ .tl-who { font-size: 11px; white-space: normal; max-width: 38%; }
+ .tl-mark-label { font-size: 11px; }
+ .tl-axis .tl-track span { font-size: 10px; }
+ .tl-axis .tl-track span:nth-child(even) { display: none; }
+}
+@media (max-width: 720px) {
+ .roles { grid-template-columns: minmax(0, 1fr); }
+ .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; }
+}
+
+.table-scroll td:last-child { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+ .paper { --figure-width: min(960px, calc(100vw - 36px)); padding: 28px 18px 64px; }
+ .numbers { --figure-width: calc(100vw - 36px); margin-top: 32px; }
+ .exhibit { margin: 30px 0 42px; }
+ .pass-row { grid-template-columns: minmax(0, 1fr); }
+ .pass-row .pass-chip { justify-self: start; }
+ .pass-marks { grid-column: 1 / 2; gap: 6px 14px; }
+ .seg { padding: 10px 12px; font-size: 13px; }
+}
+.back-home { position: fixed; left: 16px; bottom: 16px; z-index: 9999; background: #1d1f23; color: #fff; font: 600 13px system-ui, sans-serif; padding: 8px 12px; text-decoration: none; border-radius: 4px; }
+@media (max-width: 640px) {
+  .back-home { position: static; display: inline-block; margin: 12px 16px 0; }
+}
+@media (prefers-reduced-motion: reduce) { .exhibit *, .exhibit *::before, .exhibit *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body><a class="back-home" href="../../">← Casper van Tongeren</a><main class="paper"><header class="paper-head">
+<p class="kicker">Field report · AI agents at work</p>
+<h1>What Would an Agentic AI Quant Researcher Do?</h1>
+<p class="lede">One day, five AI models and me. Together we built a working lab for testing famous investing rules. This is how the work was split, how fast it went, and why the team kept catching its own mistakes.</p>
+</header>
+
+<div class="numbers" aria-label="The day in numbers">
+<div><b>6½</b><span>hours from a one-page brief to a working lab</span></div>
+<div><b>5</b><span>AI models working side by side, checking each other</span></div>
+<div><b>13</b><span>famous investing strategies, tested on 16 years of prices</span></div>
+<div><b>0</b><span>passed, and that turned out to be the honest answer</span></div>
+</div>
+</div>
+
+<section>
+<div class="prose">
+<p>Quantitative research is a fascinating field. People take an idea about markets, write it down as a precise rule and test it against years of historical prices, and most of the craft lies in not fooling yourself along the way. I know data and I know financial services. I am not a quant.</p>
+<p>So I asked myself a question: what would an AI quant researcher actually do? Reading about it seemed slow, so I decided to staff one and watch.</p>
+<p>The staff was a set of AI models, each running in its own terminal window and passing work to the others through a small tool I had built the week before. The brief was ambitious. In one day, build a research lab from an empty folder, then use it to test thirteen well-known investing strategies honestly. I expected the agents to be fast. I also expected them to be weak at maths.</p>
+</div>
+</section>
+
+<section>
+<h2>Meet the team</h2>
+<div class="roles">
+<div class="role"><span class="who lead">The lead · Claude Opus</span><p>Wrote the plan, split it into tasks, wrote a short brief for each one, and checked and merged the results. It wrote little of the code.</p></div>
+<div class="role"><span class="who codex">The specialist · Codex</span><p>Got the hardest jobs and the toughest reviews. It also built a second, independent version of the lab's engine to check the first.</p></div>
+<div class="role"><span class="who oc">The workhorses · OpenCode models</span><p>Cheaper models that did the well-defined work until their weekly allowance ran out in the afternoon.</p></div>
+<div class="role"><span class="who relief">The relief crew · Haiku and Luna</span><p>Two small, inexpensive models that took over when the workhorses ran dry. One redesigned the website. The other made the slowest step about 50 times faster.</p></div>
+</div>
+<div class="prose">
+<p>One house rule mattered more than any other. Nobody checked their own work. The important pieces went to a reviewer built by a different company, so Codex's code was read by a Claude model and the lead's plans were read by Codex.</p>
+</div>
+</section>
+
+<section>
+<h2>A lab by lunchtime</h2>
+<div class="prose">
+<p>I pasted in a one-page charter at 11:35. Six minutes later the lead had committed a plan. By noon, four agents were working at once on different parts of the lab. One built the engine that replays a strategy over history, one loaded the price data, one wrote the statistics, and one built the second engine.</p>
+</div>
+<figure id="exhibit-timeline" class="exhibit timeline"><h3>What got built, and by whom</h3><div class="parallel-timeline"><div class="tl-row owner-row"><span class="tl-label">Owner decisions</span><div class="tl-track"><span class="tl-mark" style="left:2.663%" role="img" aria-label="owner: sets the brief at 11:41"></span><span class="tl-mark-label level-down" style="left:2.663%" title="11:41">sets the brief</span><span class="tl-mark" style="left:31.905%" role="img" aria-label="owner: go bigger: real strategies, more data at 13:44"></span><span class="tl-mark-label level-up" style="left:31.905%" title="13:44">go bigger: real strategies, more data</span><span class="tl-mark" style="left:55.952%" role="img" aria-label="owner: picks a design at 15:25"></span><span class="tl-mark-label level-down" style="left:55.952%" title="15:25">picks a design</span></div></div><div class="tl-row oc"><span class="tl-label">Backtest engine</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar oc" style="left:3.425%;width:2.135%" title="Backtest engine: OpenCode, 11:44 to 11:53" role="img" aria-label="Backtest engine: OpenCode, 11:44 to 11:53"></span><span class="tl-who tl-who-right" style="left:6.360%">OpenCode</span></div></div><div class="tl-row codex"><span class="tl-label">Second engine that checks the first</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar codex" style="left:3.813%;width:1.647%" title="Second engine that checks the first: Codex, 11:46 to 11:52" role="img" aria-label="Second engine that checks the first: Codex, 11:46 to 11:52"></span><span class="tl-who tl-who-right" style="left:6.260%">Codex</span></div></div><div class="tl-row oc"><span class="tl-label">Price data</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar oc" style="left:3.813%;width:6.345%" title="Price data: OpenCode, 11:46 to 12:12" role="img" aria-label="Price data: OpenCode, 11:46 to 12:12"></span><span class="tl-who tl-who-right" style="left:10.959%">OpenCode</span></div></div><div class="tl-row oc"><span class="tl-label">Statistics</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar oc" style="left:5.155%;width:7.798%" title="Statistics: OpenCode, 11:51 to 12:24" role="img" aria-label="Statistics: OpenCode, 11:51 to 12:24"></span><span class="tl-who tl-who-right" style="left:13.752%">OpenCode</span></div></div><div class="tl-row codex"><span class="tl-label">Experiment runner</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar codex" style="left:5.413%;width:11.286%" title="Experiment runner: Codex, 11:52 to 12:40" role="img" aria-label="Experiment runner: Codex, 11:52 to 12:40"></span><span class="tl-who tl-who-right" style="left:17.498%">Codex</span></div></div><div class="tl-row oc"><span class="tl-label">Website, first version</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar oc" style="left:6.373%;width:5.722%" title="Website, first version: OpenCode, 11:56 to 12:20" role="img" aria-label="Website, first version: OpenCode, 11:56 to 12:20"></span><span class="tl-who tl-who-right" style="left:12.895%">OpenCode</span></div></div><div class="tl-row codex"><span class="tl-label">Strategy library (13 strategies)</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar codex" style="left:34.563%;width:6.401%" title="Strategy library (13 strategies): Codex, 13:55 to 14:22" role="img" aria-label="Strategy library (13 strategies): Codex, 13:55 to 14:22"></span><span class="tl-who tl-who-right" style="left:41.764%">Codex</span></div></div><div class="tl-row lead"><span class="tl-label">Running the 13 strategies</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar lead" style="left:40.964%;width:15.556%" title="Running the 13 strategies: Claude (lead), 14:22 to 15:27" role="img" aria-label="Running the 13 strategies: Claude (lead), 14:22 to 15:27"></span><span class="tl-who tl-who-right" style="left:57.320%">Claude (lead)</span></div></div><div class="tl-row oc"><span class="tl-label">Website redesign</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar oc" style="left:33.155%;width:22.437%" title="Website redesign: OpenCode, 13:49 to 15:23" role="img" aria-label="Website redesign: OpenCode, 13:49 to 15:23"></span><span class="tl-bar relief" style="left:55.952%;width:4.964%" title="Website redesign: Haiku, 15:25 to 15:45" role="img" aria-label="Website redesign: Haiku, 15:25 to 15:45"></span><span class="tl-who tl-who-right" style="left:61.717%">OpenCode, then Haiku</span></div></div><div class="tl-row relief"><span class="tl-label">50x faster checks</span><div class="tl-track"><span class="tl-grid" style="left:0.000%"></span><span class="tl-grid" style="left:21.429%"></span><span class="tl-grid" style="left:42.857%"></span><span class="tl-grid" style="left:64.286%"></span><span class="tl-grid" style="left:85.714%"></span><span class="tl-grid" style="left:100.000%"></span><span class="tl-bar relief" style="left:56.595%;width:38.825%" title="50x faster checks: Luna, 15:27 to 18:10" role="img" aria-label="50x faster checks: Luna, 15:27 to 18:10"></span><span class="tl-who tl-who-left" style="right:43.405%">Luna</span></div></div><div class="tl-axis"><span class="tl-label"></span><div class="tl-track"><span style="left:0.000%">11:30</span><span style="left:21.429%">13:00</span><span style="left:42.857%">14:30</span><span style="left:64.286%">16:00</span><span style="left:85.714%">17:30</span><span style="left:100.000%">18:30</span></div></div></div><figcaption>Each bar spans the commits that built one deliverable, coloured by the agent that built it.</figcaption></figure>
+<div class="prose">
+<p>At 12:50 the lab produced its first result. It produced it a second time with identical output, which is the first thing a research lab should be able to do. By mid-afternoon it had a library of thirteen strategies, had run each one against 73 funds and sixteen years of prices, and was showing the results on its own website. The last change to the lab itself landed at 18:09, six and a half hours after the charter.</p>
+<p>The speed came from working side by side. While one agent built the website, another wrote the strategies and a third reviewed the morning's code. The lead kept everyone supplied with clear tasks and made sure two agents never edited the same file.</p>
+</div>
+</section>
+
+<section>
+<h2>My job: decide, not do</h2>
+<div class="prose">
+<p>I wrote no code and checked no maths. My day looked more like running a small team. I set the direction, made the calls the agents left to a human, unblocked tools that got stuck, and looked at the results.</p>
+<p>A few of those calls changed the project. Around 1:45 pm, with the basic lab working, I raised the stakes. Stop testing one idea and test real, well-known strategies. Use far more data. Make the website something a person would want to read. When the first redesign came back looking plain, I said so. The lead mocked up three designs, I picked one, and it was live in under half an hour.</p>
+<p>I also kept an eye on the budget. Each model comes with its own subscription, so the cheap ones went first. When the lead was using twice as much as Codex, I told it to hand more work over.</p>
+</div>
+</section>
+
+<section>
+<h2>Checking each other's homework</h2>
+<div class="prose">
+<p>This is the part that surprised me most. I had expected the agents to struggle with the maths. The maths was fine. The mistakes turned up in the instructions, and several were in instructions the lead itself had written. What caught them was the house rule. A different agent always looked.</p>
+</div>
+<ul class="lessons">
+<li><b>The recipe that peeked at the future.</b><span>The lead wrote a rule for one strategy that quietly used information from later years to make decisions in earlier ones. That is like betting on a race after reading tomorrow's paper. Codex was asked to build it, read the rule first, and flagged the problem before writing any code.</span></li>
+<li><b>Two engines that had to agree.</b><span>Codex built a second engine from the written description alone, without seeing the first. Writing it out exposed an error in how the lead had specified trading costs. Now the two engines must match to twelve decimal places, and they do.</span></li>
+<li><b>An unfair comparison.</b><span>Every strategy is compared with random lookalikes, to rule out luck. A reviewer from a different AI company noticed that one set of lookalikes held about half as much stock as the real strategy, so beating them proved nothing. It was fixed before any result existed.</span></li>
+<li><b>The lab that said no to its boss.</b><span>During the final batch of experiments, the lead slipped in an unrelated change. The lab refused to run the next experiment. Every result records exactly which version of the code produced it, and that record would have been wrong.</span></li>
+</ul>
+<p class="pull">No single agent was reliable on its own. The team, with every piece checked by someone else, was.</p>
+<div class="prose">
+<p>I heard about each catch from the lead's reports as the day went on. Why trust results I could not check by hand? Because of the same two things every time: independent sessions checking each other, and repeated runs that land on the same result.</p>
+</div>
+</section>
+
+<section>
+<h2>So, do the famous strategies work?</h2>
+<div class="prose">
+<p>The thirteen strategies are the classics. Buy what went up last year. Buy the calmest funds. Own stocks only in winter. To pass, a strategy had to clear three hurdles, all written down before any data was touched. It had to beat a simple benchmark by a clear margin, beat a thousand random lookalikes, and still look good after a penalty for having tried thirteen ideas.</p>
+<p>None passed. Below are all thirteen, with a mark for each hurdle. Use the buttons to lower the bar and watch what happens.</p>
+</div>
+<figure id="exhibit-pass_bar" class="exhibit pass_bar"><h3>What changes when the bar moves?</h3><div class="pass-control"><div class="segmented" role="group" aria-label="Choose the hurdles" data-pass-buttons><button type="button" class="seg" data-preset="rules" data-note="All three hurdles, as registered." data-gates='{"ci":true,"placebo":true,"dsr":true,"threshold":0.95}' aria-pressed="true">The rules we set</button><button type="button" class="seg" data-preset="luck-only" data-note="Only the luck test counts. Three strategies beat their random lookalikes, but none clearly beat the benchmark." data-gates='{"ci":false,"placebo":true,"dsr":false,"threshold":0.95}' aria-pressed="false">Only the luck test</button><button type="button" class="seg" data-preset="penalty-half" data-note="Only the 13-try penalty counts, with the bar lowered to 0.5." data-gates='{"ci":false,"placebo":false,"dsr":true,"threshold":0.5}' aria-pressed="false">Only the penalty, at 0.5</button><button type="button" class="seg" data-preset="custom" data-note="Your own mix of hurdles. Use the checkboxes and slider below." data-gates='{}' aria-pressed="false">Custom</button></div><p class="pass-count" data-pass-count data-count="0" aria-live="polite">0 of 13 pass</p><p class="pass-note" data-pass-note>All three hurdles, as registered.</p><p class="figure-note" data-no-js>Enable JavaScript to try the presets. The registered result is shown below.</p><form class="pass-custom" hidden><fieldset><legend>Hurdles</legend><label><input type="checkbox" name="ci" checked> Clearly beats the benchmark</label><label><input type="checkbox" name="placebo" checked> Beats 1,000 random lookalikes</label><label><input type="checkbox" name="dsr" checked> Still convincing after the 13-try penalty</label></fieldset><label class="slider-label" for="dsr-threshold">Penalty threshold <output for="dsr-threshold">0.95</output></label><input id="dsr-threshold" type="range" name="threshold" min="0.30" max="0.95" step="0.01" value="0.95"></form></div><ol class="pass-list"><li class="pass-row" data-spec="C1-01" data-passes="false"><span class="pass-name">Buy last year&#x27;s 15 best performers</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate yes" data-gate="placebo"><b role="img" aria-label="passed">&#x2713;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-02" data-passes="false"><span class="pass-name">Hold whatever beat cash over the past year</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-03" data-passes="false"><span class="pass-name">Hold whatever trades above its 10-month average</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-04" data-passes="false"><span class="pass-name">Last year&#x27;s winners, only if they beat cash</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-05" data-passes="false"><span class="pass-name">Buy the 15 calmest funds</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-06" data-passes="false"><span class="pass-name">Hold everything, more of the calm ones</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-07" data-passes="false"><span class="pass-name">Buy last month&#x27;s 15 biggest losers</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-08" data-passes="false"><span class="pass-name">Buy the 15 worst performers of the last 5 years</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-09" data-passes="false"><span class="pass-name">Buy the 15 highest-yielding funds</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate yes" data-gate="placebo"><b role="img" aria-label="passed">&#x2713;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-10" data-passes="false"><span class="pass-name">Rotate into the 3 strongest US sectors</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-11" data-passes="false"><span class="pass-name">Rotate into the 5 strongest countries</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-12" data-passes="false"><span class="pass-name">Own US stocks only from November to April</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate no" data-gate="placebo"><b role="img" aria-label="failed">&#x2717;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li><li class="pass-row" data-spec="C1-13" data-passes="false"><span class="pass-name">Own less stock when markets are jumpy</span><span class="pass-chip no" data-chip>Fails</span><span class="pass-marks"><span class="gate no" data-gate="ci"><b role="img" aria-label="failed">&#x2717;</b><small>Benchmark</small></span><span class="gate yes" data-gate="placebo"><b role="img" aria-label="passed">&#x2713;</b><small>Luck test</small></span><span class="gate no" data-gate="dsr"><b role="img" aria-label="failed">&#x2717;</b><small>Penalty</small></span></span></li></ol><details class="pass-numbers"><summary>Show the numbers</summary><div class="table-scroll"><table class="pass-table"><thead><tr><th>Rule</th><th>Edge range (90%)</th><th>Sharpe</th><th>Random lookalike cut-off</th><th>Penalised score</th></tr></thead><tbody><tr><th scope="row">Buy last year&#x27;s 15 best performers</th><td class="num">[-0.20, +0.32]</td><td class="num">0.335</td><td class="num">0.298</td><td class="num">0.693</td></tr><tr><th scope="row">Hold whatever beat cash over the past year</th><td class="num">[-0.33, +0.18]</td><td class="num">0.203</td><td class="num">0.372</td><td class="num">0.502</td></tr><tr><th scope="row">Hold whatever trades above its 10-month average</th><td class="num">[-0.28, +0.25]</td><td class="num">0.275</td><td class="num">0.361</td><td class="num">0.611</td></tr><tr><th scope="row">Last year&#x27;s winners, only if they beat cash</th><td class="num">[-0.32, +0.27]</td><td class="num">0.254</td><td class="num">0.278</td><td class="num">0.579</td></tr><tr><th scope="row">Buy the 15 calmest funds</th><td class="num">[-0.35, +0.23]</td><td class="num">0.204</td><td class="num">0.298</td><td class="num">0.504</td></tr><tr><th scope="row">Hold everything, more of the calm ones</th><td class="num">[-0.05, +0.04]</td><td class="num">0.264</td><td class="num">0.285</td><td class="num">0.593</td></tr><tr><th scope="row">Buy last month&#x27;s 15 biggest losers</th><td class="num">[-0.31, -0.02]</td><td class="num">0.078</td><td class="num">0.273</td><td class="num">0.312</td></tr><tr><th scope="row">Buy the 15 worst performers of the last 5 years</th><td class="num">[-0.51, +0.11]</td><td class="num">0.237</td><td class="num">0.476</td><td class="num">0.545</td></tr><tr><th scope="row">Buy the 15 highest-yielding funds</th><td class="num">[-0.06, +0.17]</td><td class="num">0.324</td><td class="num">0.298</td><td class="num">0.680</td></tr><tr><th scope="row">Rotate into the 3 strongest US sectors</th><td class="num">[-0.32, +0.08]</td><td class="num">0.329</td><td class="num">0.511</td><td class="num">0.687</td></tr><tr><th scope="row">Rotate into the 5 strongest countries</th><td class="num">[-0.21, +0.05]</td><td class="num">0.095</td><td class="num">0.219</td><td class="num">0.340</td></tr><tr><th scope="row">Own US stocks only from November to April</th><td class="num">[-0.28, +0.26]</td><td class="num">0.393</td><td class="num">0.450</td><td class="num">0.775</td></tr><tr><th scope="row">Own less stock when markets are jumpy</th><td class="num">[-0.02, +0.21]</td><td class="num">0.524</td><td class="num">0.481</td><td class="num">0.898</td></tr></tbody></table></div></details><script type="application/json" data-pass-data>[{"id":"C1-01","name":"Buy last year's 15 best performers","lo":-0.19999028608116454,"hi":0.31582631790345767,"sharpe":0.33469710828381144,"placebo":0.298424002561966,"dsr":0.6934207038121183},{"id":"C1-02","name":"Hold whatever beat cash over the past year","lo":-0.33296852753940337,"hi":0.17754116887728066,"sharpe":0.20306945663204928,"placebo":0.3719105880101775,"dsr":0.5019789580023624},{"id":"C1-03","name":"Hold whatever trades above its 10-month average","lo":-0.27717546222944195,"hi":0.2510086556832608,"sharpe":0.2753733868524546,"placebo":0.3614174384096668,"dsr":0.6113197173711296},{"id":"C1-04","name":"Last year's winners, only if they beat cash","lo":-0.3208141757327581,"hi":0.27462910242236377,"sharpe":0.25415740792265973,"placebo":0.2781893727248183,"dsr":0.5790743375739185},{"id":"C1-05","name":"Buy the 15 calmest funds","lo":-0.3532797996572264,"hi":0.23079774421572857,"sharpe":0.20410789769370508,"placebo":0.298424002561966,"dsr":0.5035627205782077},{"id":"C1-06","name":"Hold everything, more of the calm ones","lo":-0.05209072231567169,"hi":0.0434766542714717,"sharpe":0.2637205271290454,"placebo":0.28527137850669876,"dsr":0.5933233097473196},{"id":"C1-07","name":"Buy last month's 15 biggest losers","lo":-0.3139837871170241,"hi":-0.016412561417537483,"sharpe":0.07758760929140104,"placebo":0.27306934212254425,"dsr":0.3121723448903425},{"id":"C1-08","name":"Buy the 15 worst performers of the last 5 years","lo":-0.5077625729947117,"hi":0.1122451565044597,"sharpe":0.2367421264154686,"placebo":0.47569658114692676,"dsr":0.5452933336068599},{"id":"C1-09","name":"Buy the 15 highest-yielding funds","lo":-0.0643761861797904,"hi":0.17383321601422838,"sharpe":0.3244493868874836,"placebo":0.298424002561966,"dsr":0.6799109377467987},{"id":"C1-10","name":"Rotate into the 3 strongest US sectors","lo":-0.31834459311478297,"hi":0.07569507182552335,"sharpe":0.3291800706576607,"placebo":0.5110014622346514,"dsr":0.687482490786618},{"id":"C1-11","name":"Rotate into the 5 strongest countries","lo":-0.2064663308774499,"hi":0.04744658941502552,"sharpe":0.09466709031143729,"placebo":0.21935228790341846,"dsr":0.33973323337329997},{"id":"C1-12","name":"Own US stocks only from November to April","lo":-0.2824971864615041,"hi":0.2614909388833857,"sharpe":0.3931663559093713,"placebo":0.450071299326291,"dsr":0.775478331479035},{"id":"C1-13","name":"Own less stock when markets are jumpy","lo":-0.02088542271473086,"hi":0.2080228337934663,"sharpe":0.524056922656782,"placebo":0.4806485695363609,"dsr":0.8982621143312687}]</script><script>
+(() => {
+ const root = document.currentScript.closest('figure');
+ const rows = JSON.parse(root.querySelector('[data-pass-data]').textContent);
+ const form = root.querySelector('form');
+ const ci = form.elements.ci, placebo = form.elements.placebo, dsr = form.elements.dsr;
+ const threshold = form.elements.threshold;
+ const count = root.querySelector('[data-pass-count]');
+ const note = root.querySelector('[data-pass-note]');
+ const buttons = Array.from(root.querySelectorAll('[data-preset]'));
+ let current = 'rules';
+ function choose(name) {
+  const button = root.querySelector('[data-preset="' + name + '"]');
+  current = name;
+  if (name !== 'custom') {
+   const gates = JSON.parse(button.dataset.gates);
+   ci.checked = gates.ci; placebo.checked = gates.placebo; dsr.checked = gates.dsr;
+   threshold.value = String(gates.threshold);
+  }
+  form.hidden = name !== 'custom';
+  for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.preset === name));
+  update();
+ }
+ function update() {
+  const limit = Number(threshold.value);
+  form.querySelector('output').textContent = limit.toFixed(2);
+  let passing = 0;
+  for (const row of rows) {
+   const results = {
+    ci: ci.checked ? row.lo > 0 : null,
+    placebo: placebo.checked ? row.sharpe > row.placebo : null,
+    dsr: dsr.checked ? (row.dsr !== null && row.dsr > limit) : null,
+   };
+   const passes = Object.values(results).every(state => state !== false);
+   passing += Number(passes);
+   const item = root.querySelector('[data-spec="' + row.id + '"]');
+   item.dataset.passes = String(passes);
+   const chip = item.querySelector('[data-chip]');
+   chip.textContent = passes ? 'Passes' : 'Fails';
+   chip.className = 'pass-chip ' + (passes ? 'yes' : 'no');
+   for (const name of ['ci', 'placebo', 'dsr']) {
+    const mark = item.querySelector('[data-gate="' + name + '"] b');
+    const state = results[name];
+    mark.textContent = state === null ? '\u2013' : (state ? '\u2713' : '\u2717');
+    mark.setAttribute('aria-label', state === null ? 'not checked' : (state ? 'passed' : 'failed'));
+   }
+  }
+  count.textContent = passing + ' of ' + rows.length + ' pass';
+  count.dataset.count = String(passing);
+  note.textContent = root.querySelector('[data-preset="' + current + '"]').dataset.note;
+ }
+ root.querySelector('[data-pass-buttons]').addEventListener('click', event => {
+  const button = event.target.closest('[data-preset]');
+  if (button) choose(button.dataset.preset);
+ });
+ form.addEventListener('input', update);
+ form.addEventListener('change', update);
+ root.querySelector('[data-no-js]').hidden = true;
+ choose(current);
+})();
+</script><figcaption>Each row shows the three hurdles, and at the registered setting no strategy clears all of them.</figcaption></figure>
+<div class="prose">
+<p>Relax the rules and "winners" start to appear. That is why the bar was fixed in advance. For twelve strategies the honest answer is "the data can't tell". One, buying last month's biggest losers, did clearly worse than the benchmark. The closest call was a strategy that owns less stock when markets get jumpy, and it is the obvious one to look at again.</p>
+<p>"Nothing passed" is less exciting than a winner. It is also what a careful lab should usually report. Finding a money machine in one afternoon would have been the real red flag.</p>
+</div>
+</section>
+
+<section>
+<h2>What an AI quant researcher does</h2>
+<div class="prose">
+<p>My answer, after the day:</p>
+<p class="quote">"You can take a theory and translate it not only to technical implementation but also to heavily tested results, both horizontally and vertically validated. This all is done autonomously and much, much faster than the human output would be."</p>
+<p>Look at where the day actually went and very little of it was maths. Most of it resembles good management.</p>
+</div>
+<ul class="lessons">
+<li><b>Write instructions precise enough to check.</b><span>When two agents build the same thing separately and get the same answer, the instructions were clear.</span></li>
+<li><b>Decide what counts as a win before looking.</b><span>The pass mark was set before the first result, so nobody could move it.</span></li>
+<li><b>Never mark your own homework.</b><span>The important work went to a reviewer from a different model family.</span></li>
+<li><b>Write everything down.</b><span>Every brief, review and result is in the project history, so any number can be traced to where it came from.</span></li>
+</ul>
+<div class="prose">
+<p>The human part did not go away. It moved. I chose what to ask, set the level of ambition, judged the design, and decided when something was good enough. The agents did the rest, in parallel, checking each other as they went.</p>
+</div>
+</section>
+
+<section>
+<hr class="end">
+<p class="foot">A few honest limits. This was one day, one person and one project. It says nothing about whether a team of agents beats a single agent, because that comparison was not run. Nobody timed the human hours or added up the cost. The strategy results apply to these funds, these years and these exact rules, not to the strategies in general.</p>
+</section>
+<p class="sources">Sources: registry/experiments.jsonl, registry/campaigns/C1.json, evidence/events.jsonl, evidence/replay/C1-workflow.json and the git history.</p></main></body>
+</html>

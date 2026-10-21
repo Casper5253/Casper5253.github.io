@@ -1,0 +1,38 @@
+{
+  "name": "casper-portfolio",
+  "version": "1.0.0",
+  "description": "Personal portfolio of Casper van Tongeren",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "smoke": "node scripts/smoke.mjs",
+    "og": "node scripts/og.mjs",
+    "cv": "node scripts/cv-pdf.mjs",
+    "check": "astro check",
+    "test": "vitest run",
+    "verify": "node scripts/contrast.mjs && npm run test && npm run check && npm run build && npm run privacy && node scripts/check-links.mjs /",
+    "github:refresh": "node scripts/fetch-github.mjs",
+    "privacy": "node scripts/privacy.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "playwright-core": "1.64.1",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-satteri": "^0.4.4",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/overpass": "^5.3.0",
+    "@fontsource/overpass-mono": "^5.3.0",
+    "astro": "^7.4.0",
+    "typescript": "^6.0.3",
+    "ultrahtml": "1.7.0"
+  },
+  "private": true,
+  "type": "module"
+}

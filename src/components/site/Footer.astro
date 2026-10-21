@@ -1,0 +1,55 @@
+---
+import { href } from './url';
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p class="colophon">Casper van Tongeren · <a href="mailto:casper5253@gmail.com">casper5253@gmail.com</a></p>
+    <nav aria-label="Elsewhere">
+      <ul>
+        <li><a href="https://github.com/Casper5253" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/caspervtongeren" rel="noopener">LinkedIn</a></li>
+        <li><a href={href('/archive/')}>The graveyard</a></li>
+        <li><a href={href('/writing/how-this-site-was-built/')}>How this site was built</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    padding: 2.5rem 0 2rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+  }
+
+  .footer-inner p {
+    margin: 0;
+  }
+
+  .footer-inner ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-inner a {
+    color: var(--muted);
+  }
+
+  .footer-inner a:hover {
+    color: var(--accent);
+  }
+</style>

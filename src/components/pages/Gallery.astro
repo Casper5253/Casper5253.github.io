@@ -1,0 +1,76 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { Artifact } from '../../data/artifacts';
+
+interface Props {
+  items: { key: string; artifact: Artifact }[];
+}
+
+const { items } = Astro.props;
+const MAX_VISIBLE = 3;
+
+const large = await Promise.all(
+  items.map(async ({ artifact }) => {
+    const width = Math.min(2400, artifact.image.width);
+    const resolved = await getImage({ src: artifact.image, width });
+    return resolved.src;
+  }),
+);
+---
+
+<div class="gallery-block">
+  <div class="gallery">
+    {items.map(({ key, artifact }, i) => (
+      <button
+        type="button"
+        class="thumb frame"
+        data-index={i}
+        hidden={i >= MAX_VISIBLE ? true : undefined}
+        aria-haspopup="dialog"
+        aria-label={`Show larger: ${artifact.title}`}
+      >
+        <Image
+          src={artifact.image}
+          alt={artifact.alt}
+          widths={[240, 480]}
+          sizes="(min-width: 900px) 240px, 42vw"
+          loading="lazy"
+        />
+      </button>
+    ))}
+    {items.length > MAX_VISIBLE && (
+      <button type="button" class="more" data-more>
+        +{items.length - MAX_VISIBLE}
+      </button>
+    )}
+  </div>
+
+  {items.map(({ artifact }, i) => (
+    <dialog class="evidence" data-dialog={i} aria-label={artifact.title}>
+      <img src={large[i]} alt={artifact.alt} loading="lazy" />
+      <p class="caption">
+        <strong>{artifact.title}</strong>
+        {artifact.caption}
+      </p>
+      <button type="button" class="close" data-close>Close</button>
+    </dialog>
+  ))}
+</div>
+
+<script>
+  for (const block of document.querySelectorAll<HTMLElement>('.gallery-block')) {
+    const more = block.querySelector('[data-more]');
+    more?.addEventListener('click', () => {
+      block.querySelectorAll<HTMLButtonElement>('button.thumb[hidden]').forEach((b) => (b.hidden = false));
+      more.remove();
+    });
+
+    for (const thumb of block.querySelectorAll<HTMLButtonElement>('button.thumb')) {
+      const dialog = block.querySelector<HTMLDialogElement>(`[data-dialog="${thumb.dataset.index}"]`);
+      if (!dialog) continue;
+      thumb.addEventListener('click', () => dialog.showModal());
+      dialog.addEventListener('close', () => thumb.focus());
+      dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+    }
+  }
+</script>

@@ -1,0 +1,239 @@
+---
+import { PROFILE } from '../../data/profile';
+import { STAGES } from '../../data/stages';
+import { href } from './url';
+
+interface Props {
+  home?: boolean;
+}
+
+const { home = false } = Astro.props;
+const links = [
+  { label: 'Story', path: '/' },
+  { label: 'Work', path: '/work/' },
+  { label: 'About & CV', path: '/about/' },
+  { label: 'Contact', path: `mailto:${PROFILE.email}` },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href={href('/')} aria-label={`${PROFILE.name}, home`}>{PROFILE.name}</a>
+    {home && (
+      <nav class="chapter-nav" aria-label="Story chapters">
+        {STAGES.map((stage, index) => (
+          <a href={href(`/#${stage.id}`)} aria-label={`Chapter ${String(index + 1).padStart(2, '0')}: ${stage.title}`}>
+            {String(index + 1).padStart(2, '0')}
+          </a>
+        ))}
+      </nav>
+    )}
+    {home && <span class="active-title" aria-hidden="true"></span>}
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="primary-menu"
+    >Menu</button>
+    <nav class="text-nav" id="primary-menu" aria-label="Primary">
+      <ul>
+        {links.map((link) => (
+          <li><a href={link.path.startsWith('mailto:') ? link.path : href(link.path)}>{link.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const primaryMenu = document.querySelector<HTMLElement>('#primary-menu');
+
+  if (menuButton && primaryMenu) {
+    const closeMenu = (restoreFocus = false) => {
+      menuButton.setAttribute('aria-expanded', 'false');
+      primaryMenu.removeAttribute('data-open');
+      if (restoreFocus) menuButton.focus();
+    };
+
+    menuButton.addEventListener('click', () => {
+      const open = menuButton.getAttribute('aria-expanded') !== 'true';
+      menuButton.setAttribute('aria-expanded', String(open));
+      if (open) primaryMenu.setAttribute('data-open', '');
+      else primaryMenu.removeAttribute('data-open');
+    });
+
+    primaryMenu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) closeMenu();
+    });
+
+    primaryMenu.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget as Node | null;
+      if (next && next !== menuButton && !primaryMenu.contains(next)) closeMenu();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+        closeMenu(true);
+      }
+    });
+
+    window.matchMedia('(min-width: 601px)').addEventListener('change', (event) => {
+      if (event.matches) closeMenu();
+    });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    z-index: 30;
+    top: 0;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    transition: background-color var(--dur-colour) ease, border-color var(--dur-colour) ease;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.7vw, 26px);
+    width: 100%;
+    max-width: calc(var(--max) + 2 * var(--gutter));
+    min-height: var(--header-h);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .wordmark {
+    flex: none;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    text-decoration: none;
+  }
+
+  .chapter-nav ul,
+  .text-nav ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1.2vw, 18px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chapter-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .chapter-nav a {
+    display: grid;
+    min-width: 42px;
+    min-height: 44px;
+    place-items: center;
+    border-bottom: 2px solid transparent;
+    font: 12px/1 var(--font-mono);
+    text-decoration: none;
+    transition: color var(--dur-1) ease, border-color var(--dur-1) ease;
+  }
+
+  .chapter-nav a[aria-current='location'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .active-title {
+    overflow: hidden;
+    max-width: 22ch;
+    color: var(--accent);
+    font: 13px/1.3 var(--heading);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--dur-colour) ease;
+  }
+
+  .text-nav { margin-left: auto; }
+
+  .text-nav a {
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .text-nav a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
+
+  .menu-toggle {
+    display: none;
+    border: 1px solid var(--rule);
+    padding: 9px 12px;
+    background: transparent;
+    color: var(--ink);
+    font: 12px var(--font-mono);
+  }
+
+  @media (max-width: 1050px) {
+    .active-title { display: none; }
+    .header-inner { gap: 12px; }
+    .chapter-nav { gap: 0; }
+    .chapter-nav a { min-width: 38px; }
+    .text-nav ul { gap: 13px; }
+  }
+
+  @media (max-width: 600px) {
+    .header-inner {
+      position: relative;
+      min-height: var(--header-h);
+      gap: 6px;
+      padding-inline: var(--gutter);
+    }
+
+    .wordmark {
+      width: 74px;
+      font-size: 12px;
+      line-height: 1.1;
+    }
+
+    .chapter-nav { gap: 0; }
+    .chapter-nav a {
+      min-width: clamp(25px, 8vw, 31px);
+      min-height: 44px;
+      font-size: 11px;
+    }
+
+    .menu-toggle {
+      display: block;
+      flex: none;
+      margin-left: auto;
+      min-height: 40px;
+      padding-inline: 10px;
+      cursor: pointer;
+    }
+
+    .text-nav {
+      position: absolute;
+      z-index: 1;
+      top: calc(100% - 1px);
+      right: var(--gutter);
+      display: none;
+      min-width: 178px;
+      margin: 0;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      box-shadow: 0 16px 32px rgb(0 0 0 / 35%);
+    }
+
+    .text-nav[data-open] { display: block; }
+    .text-nav ul { display: grid; gap: 0; padding: 6px; }
+    .text-nav a { display: block; padding: 11px 12px; font-size: 13px; }
+  }
+
+  @media (max-width: 350px) {
+    .header-inner { gap: 3px; }
+    .wordmark { width: 68px; font-size: 11px; }
+    .chapter-nav a { min-width: 25px; }
+    .menu-toggle { padding-inline: 7px; }
+  }
+</style>
