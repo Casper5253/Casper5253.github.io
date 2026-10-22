@@ -23,7 +23,7 @@ function setupStack(group: HTMLElement) {
   const dialogLinks = group.querySelector<HTMLElement>('[data-dialog-links]');
   const closeButton = group.querySelector<HTMLButtonElement>('[data-dialog-close]');
 
-  if (!stack || !cards.length || !indexButtons.length || !caption || !captionTitle || !captionCopy || !captionLinks || !dialog || !dialogImage || !dialogTitle || !dialogCaption || !dialogLinks || !closeButton) return;
+  if (!stack || !cards.length || !caption || !captionTitle || !captionCopy || !captionLinks || !dialog || !dialogImage || !dialogTitle || !dialogCaption || !dialogLinks || !closeButton) return;
 
   const stackElement = stack;
   const captionElement = caption;

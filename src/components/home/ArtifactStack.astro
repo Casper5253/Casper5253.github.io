@@ -24,9 +24,7 @@ const items = await Promise.all(itemIds.map(async (id) => {
   const artifact: Artifact = ARTIFACTS[id];
   const fullWidth = Math.min(2400, artifact.image.width);
   const fullImage = await getImage({ src: artifact.image, width: fullWidth, format: 'webp' });
-  const isFilmStill = id.startsWith('film-') && id !== 'film-energy' && id !== 'film-title-reveal';
-  const objectFit = artifact.label === 'Article opening' || isFilmStill ? 'cover' : 'contain';
-  return { artifact, fullSrc: fullImage.src, objectFit };
+  return { artifact, fullSrc: fullImage.src };
 }));
 ---
 
@@ -37,7 +35,7 @@ const items = await Promise.all(itemIds.map(async (id) => {
   </div>
 
   <div class="artifact-stack" data-stack style={`--stack-count:${items.length}`}>
-    {items.map(({ artifact, fullSrc, objectFit }, index) => (
+    {items.map(({ artifact, fullSrc }, index) => (
       <button
         class:list={['stack-card', { 'is-current': index === 0 }]}
         type="button"
@@ -63,7 +61,7 @@ const items = await Promise.all(itemIds.map(async (id) => {
             alt=""
             loading={index === 0 ? 'eager' : 'lazy'}
             decoding="async"
-            style={`aspect-ratio:${artifact.image.width}/${artifact.image.height};object-fit:${objectFit};object-position:${artifact.focus ?? 'center'}`}
+            style="aspect-ratio:16/10;object-fit:contain;object-position:center"
           />
           <span class="artifact-title">{artifact.title}</span>
         </span>
@@ -71,20 +69,22 @@ const items = await Promise.all(itemIds.map(async (id) => {
     ))}
   </div>
 
-  <div class="stack-index" role="group" aria-label={`Select an artifact from ${project.data.title}`}>
-    {items.map(({ artifact }, index) => (
-      <button
-        type="button"
-        data-stack-index
-        data-index={index}
-        aria-label={`Select item ${index + 1}: ${artifact.title}`}
-        aria-pressed={index === 0 ? 'true' : 'false'}
-      >
-        <span>{String(index + 1).padStart(2, '0')}</span>
-        {index === 0 && <span class="index-label">{artifact.label}</span>}
-      </button>
-    ))}
-  </div>
+  {items.length > 1 && (
+    <div class="stack-index" role="group" aria-label={`Select an artifact from ${project.data.title}`}>
+      {items.map(({ artifact }, index) => (
+        <button
+          type="button"
+          data-stack-index
+          data-index={index}
+          aria-label={`Select item ${index + 1}: ${artifact.title}`}
+          aria-pressed={index === 0 ? 'true' : 'false'}
+        >
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          {index === 0 && <span class="index-label">{artifact.label}</span>}
+        </button>
+      ))}
+    </div>
+  )}
 
   <div class="stack-caption" data-stack-caption aria-live="polite">
     <h4 data-caption-title>{items[0]?.artifact.title}</h4>

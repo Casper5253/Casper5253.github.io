@@ -42,12 +42,82 @@ const links = [
         ))}
       </ul>
     </nav>
+    <button
+      class="theme-switch"
+      type="button"
+      role="switch"
+      data-theme-toggle
+      aria-checked="false"
+      aria-label="Paper mode"
+    >
+      <span class="theme-word theme-word--night">Night</span>
+      <span class="theme-track">
+        <span class="theme-knob">
+          <svg class="theme-icon theme-icon--moon" viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="var(--paper)" stroke-width="1.5" aria-hidden="true">
+            <path d="M7.5 1.5A5 5 0 1 0 8.5 8.5 4 4 0 0 1 7.5 1.5Z"/>
+          </svg>
+          <svg class="theme-icon theme-icon--sun" viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="var(--paper)" stroke-width="1.5" aria-hidden="true">
+            <circle cx="5" cy="5" r="1.8"/>
+            <line x1="5" y1="0.5" x2="5" y2="2"/>
+            <line x1="5" y1="8" x2="5" y2="9.5"/>
+            <line x1="0.5" y1="5" x2="2" y2="5"/>
+            <line x1="8" y1="5" x2="9.5" y2="5"/>
+            <line x1="1.8" y1="1.8" x2="2.9" y2="2.9"/>
+            <line x1="7.1" y1="7.1" x2="8.2" y2="8.2"/>
+            <line x1="1.8" y1="8.2" x2="2.9" y2="7.1"/>
+            <line x1="7.1" y1="2.9" x2="8.2" y2="1.8"/>
+          </svg>
+        </span>
+      </span>
+      <span class="theme-word theme-word--paper">Paper</span>
+    </button>
   </div>
 </header>
 
 <script>
   const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
   const primaryMenu = document.querySelector<HTMLElement>('#primary-menu');
+  const themeButton = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+
+  const readStoredTheme = () => {
+    try { return localStorage.getItem('theme') ?? ''; } catch { return ''; }
+  };
+  const storedTheme = readStoredTheme();
+  const saveTheme = (value: string) => {
+    try {
+      if (value) localStorage.setItem('theme', value);
+      else localStorage.removeItem('theme');
+    } catch { /* Storage may be blocked; the choice just will not persist. */ }
+  };
+  const setMeta = (name: string, content: string) => {
+    const meta = document.querySelector<HTMLMetaElement>(`meta[name='${name}']`);
+    if (meta) meta.setAttribute('content', content);
+  };
+
+  if (themeButton) {
+    const apply = (editorial: boolean) => {
+      if (editorial) document.documentElement.dataset.theme = 'editorial';
+      else delete document.documentElement.dataset.theme;
+      setMeta('theme-color', editorial ? '#fbfaf7' : '#0d0e12');
+      setMeta('color-scheme', editorial ? 'light' : 'dark');
+      themeButton.setAttribute('aria-checked', String(editorial));
+    };
+
+    apply(storedTheme === 'editorial');
+
+    themeButton.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme !== 'editorial';
+      apply(next);
+      saveTheme(next ? 'editorial' : '');
+      document.dispatchEvent(new CustomEvent('themechange'));
+    });
+
+    window.addEventListener('pageshow', (event) => {
+      if (!event.persisted) return;
+      apply(readStoredTheme() === 'editorial');
+      document.dispatchEvent(new CustomEvent('themechange'));
+    });
+  }
 
   if (menuButton && primaryMenu) {
     const closeMenu = (restoreFocus = false) => {
@@ -156,6 +226,90 @@ const links = [
 
   .text-nav { margin-left: auto; }
 
+  .theme-switch {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .theme-word {
+    font: 11px/1 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    color: var(--quiet);
+    transition: color var(--dur-1) ease;
+  }
+
+  :global(html:not([data-theme='editorial'])) .theme-word--night,
+  :global(html[data-theme='editorial']) .theme-word--paper {
+    color: var(--ink);
+  }
+
+  .theme-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 36px;
+    height: 20px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) ease;
+  }
+
+  :global(html[data-theme='editorial']) .theme-track {
+    background: var(--tint);
+  }
+
+  .theme-switch:hover .theme-track {
+    border-color: color-mix(in srgb, var(--ink) 45%, var(--rule));
+  }
+
+  .theme-switch:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .theme-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+
+  :global(html[data-theme='editorial']) .theme-knob {
+    transform: translateX(16px);
+  }
+
+  .theme-icon {
+    position: absolute;
+  }
+
+  .theme-icon--sun {
+    opacity: 0;
+  }
+
+  :global(html[data-theme='editorial']) .theme-icon--moon {
+    opacity: 0;
+  }
+
+  :global(html[data-theme='editorial']) .theme-icon--sun {
+    opacity: 1;
+  }
+
   .text-nav a {
     font-size: 13px;
     font-weight: 600;
@@ -183,6 +337,8 @@ const links = [
   }
 
   @media (max-width: 600px) {
+    .theme-word { display: none; }
+
     .header-inner {
       position: relative;
       min-height: var(--header-h);
@@ -231,9 +387,15 @@ const links = [
   }
 
   @media (max-width: 350px) {
-    .header-inner { gap: 3px; }
-    .wordmark { width: 68px; font-size: 11px; }
+    .header-inner { gap: 3px; padding-inline: 10px; }
+    .wordmark { width: 64px; font-size: 11px; }
     .chapter-nav a { min-width: 25px; }
     .menu-toggle { padding-inline: 7px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-knob,
+    .theme-track,
+    .theme-word { transition: none; }
   }
 </style>

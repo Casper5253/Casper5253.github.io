@@ -1,5 +1,6 @@
 /*
- * Design tokens. Night palette only (approved in Phase 2.6).
+ * Design tokens. Night palette (approved in Phase 2.6) plus an editorial light theme (Phase 5),
+ * switched by html[data-theme='editorial'] and persisted in localStorage key `theme`.
  * The page takes the active chapter's palette through html[data-chapter]; a chapter section carries its own
  * accent through [data-tone] so its title keeps its colour while the page is still in the previous chapter.
  * scripts/contrast.mjs checks every text and accent colour here against every paper colour.
@@ -46,6 +47,40 @@
 [data-tone='refine'] { --accent: #b7a5ff; --tint: #211a35; --heading: var(--font-sans); }
 [data-tone='deliver'] { --accent: #a4dc8c; --tint: #182719; --heading: var(--font-mono); }
 [data-tone='learn'] { --accent: #ff9b65; --tint: #2b1b12; --heading: var(--font-serif); }
+
+/* Dark surfaces used by the skip link, artifact prints and dialog imagery. Editorial re-lights them. */
+:root { --surface: #1c2223; --surface-card: #151b19; --surface-deep: #101416; --backdrop-image: #0b0c10; }
+
+/*
+ * Editorial: a light, quiet reading theme. Same content and layout, no field, no glow.
+ * The page background never changes colour here, so every chapter shares paper and tint.
+ */
+:root[data-theme='editorial'] {
+  color-scheme: light;
+  --paper: #fbfaf7;
+  --tint: #f1eee7;
+  --ink: #1b1a17;
+  --muted: #45423b;
+  --quiet: #5f5b53;
+  --rule: #d8d3c8;
+  --accent: #a63a22;
+  --surface: #ffffff;
+  --surface-card: #ffffff;
+  --surface-deep: #efeadf;
+}
+
+:root[data-theme='editorial'][data-chapter='opening'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #a63a22; }
+:root[data-theme='editorial'][data-chapter='understand'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #0f6656; }
+:root[data-theme='editorial'][data-chapter='build'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #a63a22; }
+:root[data-theme='editorial'][data-chapter='refine'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #5b47b0; }
+:root[data-theme='editorial'][data-chapter='deliver'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #3b6526; }
+:root[data-theme='editorial'][data-chapter='learn'] { --paper: #fbfaf7; --tint: #f1eee7; --accent: #9c4416; }
+
+[data-theme='editorial'] [data-tone='understand'] { --accent: #0f6656; --tint: #f1eee7; --heading: var(--font-mono); }
+[data-theme='editorial'] [data-tone='build'] { --accent: #a63a22; --tint: #f1eee7; --heading: var(--font-serif); }
+[data-theme='editorial'] [data-tone='refine'] { --accent: #5b47b0; --tint: #f1eee7; --heading: var(--font-sans); }
+[data-theme='editorial'] [data-tone='deliver'] { --accent: #3b6526; --tint: #f1eee7; --heading: var(--font-mono); }
+[data-theme='editorial'] [data-tone='learn'] { --accent: #9c4416; --tint: #f1eee7; --heading: var(--font-serif); }
 
 @media (max-width: 600px) {
   :root { --header-h: 62px; --gutter: 20px; }

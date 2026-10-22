@@ -5,7 +5,7 @@ import { blocked, chapterFrom, clamp, formation, freeRegions, random, type Chapt
 export type FrameSample = { timestamp: number; work: number; drawn: number; renderer: RendererKind };
 export type FieldOptions = { renderer?: RendererKind; onFrame?: (sample: FrameSample) => void };
 const exclusionSelector = 'h1,h2,h3,h4,h5,h6,p,li,dt,dd,blockquote,figure,img,svg,video,a,button,label,input,textarea,select,pre,table,[data-field-exclude],[data-artifact-plane],.site-header';
-const empty: Field = { setChapter() {}, measure() {} };
+const empty: Field = { setChapter() {}, measure() {}, destroy() {} };
 const scrollPace = 3000;
 const area = (rect: Rect) => (rect.right - rect.left) * (rect.bottom - rect.top);
 const overlap = (a: Rect, b: Rect) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
@@ -333,13 +333,15 @@ export function createField(options: FieldOptions = {}): Field {
     stop(); clearFade(); pointer = null; parallaxX = parallaxY = targetX = targetY = 0;
     if (reduced.matches) { phase = 0; settle(); draw(); } else wake();
   }, { signal: events.signal });
-  addEventListener('pagehide', event => {
+  // Full teardown, reused by pagehide and by the theme toggle when editorial destroys the running field.
+  function destroy(persisted = false) {
     stop(); clearFade();
-    if (!event.persisted) {
+    if (!persisted) {
       disposed = true; events.abort(); ro.disconnect(); io.disconnect();
       clearTimeout(measureTimer); renderer?.dispose(); canvas.remove();
     }
-  }, { signal: events.signal });
+  }
+  addEventListener('pagehide', (event) => destroy(event.persisted), { signal: events.signal });
   addEventListener('pageshow', () => { measureNow(); }, { signal: events.signal });
   requestAnimationFrame(() => {
     if ('requestIdleCallback' in window) window.requestIdleCallback(() => { void initialise(); }, { timeout: 250 });
@@ -353,5 +355,6 @@ export function createField(options: FieldOptions = {}): Field {
       chapter = next; phase = 0; colour = readColour(); measureNow();
     },
     measure: scheduleMeasure,
+    destroy: () => destroy(false),
   };
 }

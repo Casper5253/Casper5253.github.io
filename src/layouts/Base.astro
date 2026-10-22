@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Footer from '../components/site/Footer.astro';
 import Header from '../components/site/Header.astro';
 import { href } from '../components/site/url';
+import { PROFILE } from '../data/profile';
 
 interface Props {
   title: string;
@@ -17,13 +18,13 @@ const ogImage = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/og.png`,
 const person = {
   '@context': 'https://schema.org',
   '@type': 'Person',
-  name: 'Casper van Tongeren',
-  jobTitle: 'Senior Consultant, AI & Data',
-  email: 'mailto:casper5253@gmail.com',
+  name: PROFILE.name,
+  jobTitle: PROFILE.title,
+  email: `mailto:${PROFILE.email}`,
   url: new URL(import.meta.env.BASE_URL, Astro.site).href,
-  sameAs: ['https://github.com/Casper5253', 'https://www.linkedin.com/in/caspervtongeren'],
-  worksFor: { '@type': 'Organization', name: 'Deloitte' },
-  address: { '@type': 'PostalAddress', addressLocality: 'Singapore' },
+  sameAs: [PROFILE.links.github, PROFILE.links.linkedin],
+  worksFor: { '@type': 'Organization', name: PROFILE.employer },
+  address: { '@type': 'PostalAddress', addressLocality: PROFILE.location },
 };
 ---
 
@@ -47,6 +48,19 @@ const person = {
     <script type="application/ld+json" set:html={JSON.stringify(person)} />
     <meta name="theme-color" content="#0d0e12" />
     <meta name="color-scheme" content="dark" />
+    <script is:inline>
+      // Restores the saved theme before first paint: no flash, and the metas match from the start.
+      (() => {
+        let theme = '';
+        try { theme = localStorage.getItem('theme') ?? ''; } catch { theme = ''; }
+        if (theme !== 'editorial') return;
+        document.documentElement.dataset.theme = 'editorial';
+        for (const [name, content] of [['theme-color', '#fbfaf7'], ['color-scheme', 'light']]) {
+          const meta = document.querySelector(`meta[name='${name}']`);
+          if (meta) meta.setAttribute('content', content);
+        }
+      })();
+    </script>
   </head>
   <body>
     <a class="skip-link" href={href('#main')}>Skip to content</a>

@@ -1,14 +1,15 @@
 ---
 import { href } from './url';
+import { PROFILE } from '../../data/profile';
 ---
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <p class="colophon">Casper van Tongeren · <a href="mailto:casper5253@gmail.com">casper5253@gmail.com</a></p>
+    <p class="colophon">{PROFILE.name} · <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a></p>
     <nav aria-label="Elsewhere">
       <ul>
-        <li><a href="https://github.com/Casper5253" rel="noopener">GitHub</a></li>
-        <li><a href="https://www.linkedin.com/in/caspervtongeren" rel="noopener">LinkedIn</a></li>
+        <li><a href={PROFILE.links.github} rel="noopener">GitHub</a></li>
+        <li><a href={PROFILE.links.linkedin} rel="noopener">LinkedIn</a></li>
         <li><a href={href('/archive/')}>The graveyard</a></li>
         <li><a href={href('/writing/how-this-site-was-built/')}>How this site was built</a></li>
       </ul>

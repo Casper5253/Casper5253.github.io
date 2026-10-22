@@ -16,6 +16,7 @@ export type DiagramId = (typeof DIAGRAM_IDS)[number];
 export interface Stage {
   id: StageId;
   title: string;
+  short?: string;
   /** The line under the title in the opening overview. */
   overview: string;
   /** The chapter's standfirst. */
@@ -41,6 +42,7 @@ export const STAGES: Stage[] = [
   {
     id: 'build',
     title: 'Build the first working thing',
+    short: 'Build it',
     overview: 'Turn the idea into software that works.',
     line: 'Get from a conversation to something people can use, quickly, without building an impressive demo that falls over.',
     body: [
@@ -53,6 +55,7 @@ export const STAGES: Stage[] = [
   {
     id: 'refine',
     title: 'Refine it with real feedback',
+    short: 'Refine it',
     overview: 'Put it in front of people. Listen. Adapt.',
     line: 'Put the first version in front of the people who will use it, listen carefully, and make it fit how they work rather than the general case.',
     body: [
@@ -65,6 +68,7 @@ export const STAGES: Stage[] = [
   {
     id: 'deliver',
     title: 'Deliver it and help people use it',
+    short: 'Deliver it',
     overview: 'Make it work where people work.',
     line: 'Working on my machine is not the finish line. It has to fit how people work, keep working, and be handed over properly.',
     body: [

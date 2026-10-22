@@ -394,3 +394,7 @@ a.cv-button:hover { filter: brightness(1.08); }
   .about-section { border-bottom-color: #bbb; }
   h1, h2, h3 { break-after: avoid; }
 }
+
+html[data-theme='editorial'] .frame,
+html[data-theme='editorial'] .gallery button.thumb { border: 1px solid var(--rule); box-shadow: none; }
+html[data-theme='editorial'] .frame img { filter: none; }

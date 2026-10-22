@@ -8,9 +8,15 @@ const chapterLinks = [...document.querySelectorAll<HTMLAnchorElement>('.chapter-
 const activeTitle = document.querySelector<HTMLElement>('.active-title');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const chapterTitles = new Map(chapters.map((chapter) => [chapter.id, chapter.querySelector('h2')?.textContent ?? '']));
-let fieldController: { setChapter(id: string): void; measure(): void } | undefined;
+const chapterShortTitles = new Map(chapters.map((chapter) => [chapter.id, chapter.dataset.shortTitle ?? '']));
+let fieldController: { setChapter(id: string): void; measure(): void; destroy(): void } | undefined;
+let fieldStarted = false;
+let fieldGeneration = 0;
+let fieldImageEvents: AbortController | undefined;
 let activeId = 'opening';
 let updateFrame = 0;
+
+const isEditorial = () => document.documentElement.dataset.theme === 'editorial';
 
 function validSection(id: string) {
   return sections.find((section) => section.id === id);
@@ -27,7 +33,7 @@ function activate(id: string) {
     else link.removeAttribute('aria-current');
   });
   if (activeTitle) {
-    activeTitle.textContent = title;
+    activeTitle.textContent = chapterShortTitles.get(id) || title;
     if (title) activeTitle.dataset.tone = id;
     else activeTitle.removeAttribute('data-tone');
   }
@@ -85,22 +91,50 @@ initializeStacks();
 activate(validSection(window.location.hash.slice(1))?.id ?? 'opening');
 scheduleUpdate();
 
-window.requestAnimationFrame(() => {
-  window.requestAnimationFrame(async () => {
+// The Depth field belongs to night only. Editorial starts with no field at all; switching themes
+// destroys or restarts it, and the toggle announces that with a themechange event on document.
+async function ensureField() {
+  if (fieldStarted || fieldController || isEditorial()) return;
+  fieldStarted = true;
+  const generation = fieldGeneration;
+  try {
     const { startField } = await import('./field');
+    if (generation !== fieldGeneration || isEditorial() || fieldController) return;
     const field = startField();
     fieldController = field;
     field.setChapter(activeId);
     field.measure();
 
-    document.fonts.ready.then(() => field.measure());
+    document.fonts.ready.then(() => fieldController?.measure());
+    fieldImageEvents = new AbortController();
     [...document.images].forEach((image) => {
       if (image.complete) {
-        field.measure();
+        fieldController?.measure();
         return;
       }
-      image.addEventListener('load', () => field.measure(), { once: true });
-      image.addEventListener('error', () => field.measure(), { once: true });
+      image.addEventListener('load', () => fieldController?.measure(), { once: true, signal: fieldImageEvents?.signal });
+      image.addEventListener('error', () => fieldController?.measure(), { once: true, signal: fieldImageEvents?.signal });
     });
-  });
+  } finally {
+    if (generation === fieldGeneration && !fieldController) fieldStarted = false;
+  }
+}
+
+document.addEventListener('themechange', () => {
+  fieldGeneration += 1;
+  if (isEditorial()) {
+    fieldImageEvents?.abort();
+    fieldImageEvents = undefined;
+    fieldController?.destroy();
+    fieldController = undefined;
+    fieldStarted = false;
+  } else {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => { void ensureField(); });
+    });
+  }
+});
+
+window.requestAnimationFrame(() => {
+  window.requestAnimationFrame(() => { void ensureField(); });
 });

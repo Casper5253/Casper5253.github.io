@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>How This Site Was Built</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=optional">
 <style>
 :root {
   --paper: #f5f7fa; --ink: #16202c; --muted: #586476; --rule: #d9dfe7; --wash: #e9edf3;
@@ -182,6 +182,15 @@ header.top > *, article > *, section > *, .prose > * { min-width: 0; }
     <p>Then each read the other's report, re-tested what could be checked, and answered in writing. Opus reproduced all three of Sol's problems and changed its verdict, conceding that it had measured how smoothly frames arrived rather than where the stars went. Sol used my own feedback answers to overturn two of Opus's recommendations that contradicted choices I had already approved, and caught Opus illustrating a point with a story that was not in the evidence. Opus withdrew it. One of Opus's findings landed on the lead agent too: a line written during the fixes claimed a tool was still in use, which nobody could confirm.</p>
     <p>The agreed list went to the team: three problems that had to be fixed, fourteen smaller ones worth fixing, and a few subjective calls left to me. After the fixes, each reviewer re-checked its own findings in the running site. Most were resolved. One was only partly resolved, a brief dip of the stars in one chapter, and it is recorded rather than declared done.</p>
     <p>It was the most useful step of the project. A team that has looked at something for weeks stops seeing it. Two critics who disagree, and then have to defend their claims to each other with evidence, find what the builders cannot, and they are honest about what they got wrong.</p>
+  </div>
+</section>
+
+<section class="col">
+  <h2>After launch, a quieter way to read</h2>
+  <div class="prose">
+    <p>A day after the site went live, I realised not everyone wants a dark sky full of moving stars. Some people just want to read. So the site now has a switch at the top: Night is the version described above, and Paper is a light, editorial version with the same words and the same projects, without the star field, the glow or the shadows. The choice is remembered from page to page.</p>
+    <p>The same review habit applied. Sol tested the new mode in the browser and found that switching back and forth quickly while the page was still loading could leave the stars running underneath the paper, and that the browser's back button could bring back the theme you had just left. Both were fixed, with tests that recreate each situation. The same round fixed things I had noticed myself: in one image stack, two cards were completely hidden behind taller ones and could only be opened through the numbers underneath. Every card in a stack now gets the same frame, so each one shows an edge you can click.</p>
+    <p>The team had its own lesson. The cheaper implementer's memory of the session kept growing until it lost track of the task. The router had measured this, but nothing asked it at the right moment. It now warns when work is sent to an overloaded agent and compacts one under pressure, even mid-task.</p>
   </div>
 </section>
 

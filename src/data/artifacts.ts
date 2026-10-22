@@ -108,7 +108,7 @@ export const ARTIFACTS = {
   },
   'film-energy': {
     image: filmEnergy, project: 'film', print: false, dark: true,
-    title: 'Music energy map', label: 'How the agent cut to the beat',
+    title: 'Music energy map', label: 'Cut to the beat',
     caption: 'The agent\'s analysis of each track\'s energy over time, used to place the cuts.',
     alt: 'Chart of several music tracks, each a line of loudness over time with marked peaks.',
   },

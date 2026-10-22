@@ -21,7 +21,7 @@ const showcases = orderedProjects.filter((project) => project.data.home?.diagram
 const cards = orderedProjects.filter((project) => !project.data.home?.diagram && !project.data.home?.stack?.length);
 ---
 
-<section class="chapter" id={stage.id} data-chapter={stage.id} data-tone={stage.id} aria-labelledby={`heading-${stage.id}`}>
+<section class="chapter" id={stage.id} data-chapter={stage.id} data-tone={stage.id} data-short-title={stage.short ?? ''} aria-labelledby={`heading-${stage.id}`}>
   <div class="chapter-heading">
     <p class="eyebrow">Chapter {String(index + 1).padStart(2, '0')}</p>
     <h2 id={`heading-${stage.id}`} tabindex="-1">{stage.title}</h2>

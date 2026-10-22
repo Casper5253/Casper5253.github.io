@@ -43,7 +43,7 @@ Change `status` in the project's frontmatter. Labels: `ongoing`, `in-progress`, 
 
 ## Update experience, education, skills, portrait
 
-Everything on /about/ comes from `src/data/profile.ts` (and the portrait in `src/assets/portrait/`). Nothing is ever invented elsewhere. Then refresh the CV PDF:
+Everything on /about/, the footer and the page metadata comes from `src/data/profile.ts` (and the portrait in `src/assets/portrait/`). Nothing is ever invented elsewhere. Then refresh the CV PDF:
 
     npm run build && npm run cv && npm run build
 
@@ -51,8 +51,29 @@ Everything on /about/ comes from `src/data/profile.ts` (and the portrait in `src
 
 The home page tells the story in five chapters (`src/data/stages.ts`): **understand** the problem, **build** the first working thing, **refine** it with real feedback, **deliver** it and help people use it, and **learn**, improve, repeat. The rule: one project, one appearance. Each project names exactly one `home` chapter in its frontmatter; it shows up there as a showcase (its `diagram`, then its `stack`) or as a card in "The work behind it", never in more than one chapter, and never twice. A project without a `home` block simply stays off the home page. A unit test (`tests/project-home-uniqueness.test.ts`) and the home e2e enforce this; the schema is strict, so the retired `stages` key now fails the build. To add a diagram or stack: set `home.diagram` to a `DiagramId` (defined in `src/components/home/Diagram.astro`) or `home.stack` to artifact ids from `src/data/artifacts.ts` — each diagram and artifact may serve only one project.
 
+## Themes: Night and Paper
+
+The site has two themes. **Night** (the default) is the dark palette with the Depth star field. **Paper** is a light editorial reading mode with the same content, no star field, no glow and no shadows. The switch in the header sets `data-theme="editorial"` on `<html>` and stores the choice in `localStorage` (`theme`). An inline script in `src/layouts/Base.astro` applies it before the first paint, and a `pageshow` handler reconciles it after back/forward navigation.
+
+- Colours are tokens. Night lives in the `:root` blocks of `src/styles/tokens.css`, Paper in the `[data-theme='editorial']` blocks below them. Change a colour there, never in a component, then run `node scripts/contrast.mjs`: it checks both palettes against WCAG AA.
+- Anything decorative (glow, shadow, filters) needs a Paper override that turns it off; search for `data-theme='editorial'` in `src/styles/` for the existing ones.
+- `src/scripts/chapters.ts` starts the star field only in Night and destroys it when switching to Paper. A generation counter guards the asynchronous import, so a quick switch cannot leave a field running.
+
+## Image stacks
+
+Every print in a stack uses the same 16:10 frame with `object-fit: contain`, so screenshots of any shape stay whole and every card keeps an edge you can click. A project with a single artifact renders one print and no index. Dialogs show the image at its own size.
+
 ## Verify and publish
 
     npm run verify     # contrast, unit tests, astro check, build, privacy, link check
+
+With the production preview running (`npx astro preview --port 4329`), the browser checks are:
+
+    node tests/e2e/theme.mjs        # Night/Paper switch, persistence, back/forward, no stray star field
+    node tests/e2e/stack-hit.mjs    # every stack card clickable and opens its own image
+    node tests/e2e/fix-a-checks.mjs # skip link and phone case-study columns
+    TEST_ORIGIN=http://localhost:4329/ node tests/e2e/field-scroll.mjs  # star field while scrolling
+
+`tests/e2e/home.mjs` and `stage-2.mjs` save screenshots while they run; check `git status` afterwards.
 
 Then preview (`npm run preview`), get Casper's approval, and push to `main` — the deploy workflow builds and publishes automatically.
