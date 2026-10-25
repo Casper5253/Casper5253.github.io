@@ -12,6 +12,10 @@ home:
   note: What one agent learned is searchable by the next, labelled as current or historical.
   stack: [memory-graph]
 repo: https://github.com/Casper5253/agent-memory
+article:
+  title: Goldfish no more
+  href: /writing/agentmem/
+  standfirst: My coding agents forgot everything the moment a session ended. Teaching them to remember was easy. Teaching them what to forget took the rest of the month.
 facts:
   - label: Agents captured by one pipeline
     value: 3 (Claude Code, Codex, OpenCode)
@@ -19,18 +23,15 @@ facts:
   - label: Time a capture adds to an agent turn
     value: about 1 second, and it never fails the turn
     source: agent-memory README
-  - label: Automated tests on the final candidate
-    value: 607, all passing
-    source: agent-memory release decision
-  - label: Contract criteria passing on live evidence or review
-    value: 10 of 10; Claude Code and Codex verified live, OpenCode not yet
-    source: agent-memory acceptance evidence
+  - label: Sessions that never reached the first version's project note
+    value: 92 of 213
+    source: agent-memory docs/llmwiki-evaluation/LESSONS.md
 artifacts: [memory-graph]
 ---
 
 ## The problem
 
-Three agents, each with its own transcript format and its own amnesia. A decision made with Claude on Monday was invisible to Codex on Tuesday, and the old setup dumped hundreds of megabytes of raw transcripts into my notes.
+Three agents, each with its own transcript format and its own amnesia. A decision made with Claude on Monday was invisible to Codex on Tuesday. My first fix saved everything, and still leaked: sessions that never reached the project note, invented facts, and reversed decisions that came back as current. Memory that is confidently wrong is worse than none.
 
 ## My role
 
@@ -49,10 +50,8 @@ The rule I ended up with: sessions are evidence, each project has one status pag
 
 ## Result
 
-Verified live on Claude Code and Codex, with the real vault and real sessions. The live runs found defects that the unit tests had missed. Startup sections were cut at the context cap. Search labels were wrong on stale excerpts. The model once dropped a cited decision. Background workers flashed console windows. Each defect got a test that fails on the old code, and each fix was checked live again. The final candidate passes 607 tests.
-
-OpenCode is installed and covered by the tests, but not yet verified live. Its quota was nearly spent during the release checks.
+Every new session now opens with a short briefing: what the project is for, what works, what's in progress, the key decisions with their reasons, and what's next. Change your mind on Wednesday, and Monday's decision moves to history with the reason it was replaced. The next session only sees the current call, and can still find out why it changed.
 
 ## What I learned
 
-Labelling each search hit as current or historical mattered more than finding more hits. Unit tests passed while live sessions still failed. The live runs were the real test.
+Test the job, not the parts. Every component passed while the product failed, and the bugs that mattered only showed up once real agents ran real sessions. Let the model propose and let code decide: every rule that mattered ended up in code.
