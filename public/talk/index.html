@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Building With a Team of Agents</title>
+<meta name="description" content="Slides from Casper van Tongeren's talk on building with a team of AI agents: hx, agentmem and Jotarium.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root { --ink:#11161c; --paper:#e9ecf1; --muted:#697077; --accent:#e8590b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#d9dee5; color:var(--ink); font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif; }
+  header { max-width:1100px; margin:0 auto; padding:40px 20px 8px; }
+  h1 { margin:0; font-size:clamp(28px,4vw,44px); letter-spacing:-0.03em; }
+  .meta { margin:8px 0 0; color:var(--muted); font-size:17px; }
+  .actions { display:flex; flex-wrap:wrap; gap:12px; margin:20px 0 8px; }
+  .actions a { padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:600; font-size:16px; }
+  .primary { background:var(--ink); color:#fff; }
+  .secondary { border:1px solid #b9c0c9; color:var(--ink); background:#fff; }
+  main { max-width:1100px; margin:0 auto; padding:12px 20px 64px; display:grid; gap:20px; }
+  .frame { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; border-radius:12px; box-shadow:0 8px 24px rgba(17,22,28,.12); background:var(--paper); }
+  .frame > section { position:absolute !important; left:0; top:0; transform-origin:0 0; }
+  .num { margin:6px 0 0; font-size:14px; color:var(--muted); }
+  footer { text-align:center; color:var(--muted); font-size:14px; padding:0 20px 48px; }
+  footer a { color:inherit; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Building With a Team of Agents</h1>
+  <p class="meta">Casper van Tongeren · Agentic builders, 27 November 2026</p>
+  <div class="actions">
+    <a class="primary" href="building-with-a-team-of-agents.pdf" download>Download the slides (PDF)</a>
+    <a class="secondary" href="https://jotarium.com">jotarium.com</a>
+    <a class="secondary" href="https://www.linkedin.com/in/caspervtongeren">LinkedIn</a>
+  </div>
+</header>
+<main>
+<div><div class="frame"><section id="cover" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#11161c;color:#f2f4f7;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h1 style="position:absolute;left:128px;top:300px;margin:0;font-size:72px;font-weight:700;line-height:1.02;letter-spacing:-0.035em;white-space:nowrap">Building with a team of agents</h1>
+<p style="position:absolute;left:128px;top:424px;margin:0;width:1200px;font-size:34px;line-height:1.45;color:#b8c0ca">The tooling and skills that sustain an in-control, hyper efficient and effective agentic building ecosystem.</p>
+<p style="position:absolute;left:128px;top:772px;margin:0;font-size:30px;font-weight:600">Casper van Tongeren</p>
+<p style="position:absolute;left:128px;top:818px;margin:0;font-size:24px;color:#8e97a2">Agentic builders &middot; 27 November</p>
+
+</section></div><p class="num">1 / 17</p></div>
+<div><div class="frame"><section id="opening" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">The incident that started it all</h2>
+
+<div style="position:absolute;left:170px;top:250px;width:300px;height:340px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:17px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#e8590b">Me</p>
+<p style="margin:24px 0 0;font-size:21px;line-height:1.4">"Make a work package for OpenCode. Read the Obsidian graph for context."</p>
+</div>
+<p style="position:absolute;left:470px;top:400px;margin:0;width:20px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+
+<div style="position:absolute;left:490px;top:250px;width:300px;height:340px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:17px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Codex</p>
+<p style="margin:58px 0 0;font-size:44px;font-weight:700;letter-spacing:-0.03em">"On it."</p>
+<p style="position:absolute;left:24px;bottom:24px;margin:0;font-size:18px;color:#697077">Then silence.</p>
+</div>
+<p style="position:absolute;left:790px;top:400px;margin:0;width:20px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+
+<div style="position:absolute;left:810px;top:250px;width:300px;height:340px;box-sizing:border-box;padding:24px;background:#e9ecf1;border:2px dashed #9aa3ad;border-radius:18px">
+<p style="margin:0;font-size:17px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Black box</p>
+<p style="margin:58px 0 0;font-size:44px;font-weight:700;letter-spacing:-0.03em">25 min</p>
+<p style="position:absolute;left:24px;bottom:24px;margin:0;font-size:18px;color:#697077">No updates</p>
+</div>
+<p style="position:absolute;left:1110px;top:400px;margin:0;width:20px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+
+<div style="position:absolute;left:1130px;top:250px;width:300px;height:340px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:17px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Codex</p>
+<p style="margin:58px 0 0;font-size:44px;font-weight:700;letter-spacing:-0.03em">"Done."</p>
+<p style="position:absolute;left:24px;bottom:24px;margin:0;font-size:18px;color:#697077">A glowing report</p>
+</div>
+<p style="position:absolute;left:1430px;top:400px;margin:0;width:20px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+
+<div style="position:absolute;left:1450px;top:250px;width:300px;height:340px;box-sizing:border-box;padding:24px;background:#11161c;border:1px solid #11161c;border-radius:18px;color:#f2f4f7">
+<p style="margin:0;font-size:17px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#e8590b">The truth</p>
+<p style="margin:20px 0 0;font-size:19px;line-height:1.42;color:#d5dbe3">Codex's 5-hour window was gone. It re-read the repo, called OpenCode, OpenCode failed, and did it all itself.</p>
+<p style="position:absolute;left:24px;bottom:22px;margin:0;font-size:16px;color:#8e97a2">Nothing coordinated. Nothing remembered.</p>
+</div>
+
+<div style="position:absolute;left:140px;top:664px;width:520px;height:156px;box-sizing:border-box;padding:24px 28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:40px;font-weight:700;letter-spacing:-0.03em;color:#e8590b">5 h</p>
+<p style="margin:8px 0 0;font-size:20px;color:#46505a">Codex's frontier window, spent</p>
+</div>
+<div style="position:absolute;left:700px;top:664px;width:520px;height:156px;box-sizing:border-box;padding:24px 28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:40px;font-weight:700;letter-spacing:-0.03em;color:#e8590b">100</p>
+<p style="margin:8px 0 0;font-size:20px;color:#46505a">documents re-read from the archive</p>
+</div>
+<div style="position:absolute;left:1260px;top:664px;width:520px;height:156px;box-sizing:border-box;padding:24px 28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:40px;font-weight:700;letter-spacing:-0.03em;color:#e8590b">0</p>
+<p style="margin:8px 0 0;font-size:20px;color:#46505a">tasks done by OpenCode, with 97% left</p>
+</div>
+
+
+</section></div><p class="num">2 / 17</p></div>
+<div><div class="frame"><section id="system" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">One tool for each missing piece</h2>
+
+<div style="position:absolute;left:128px;top:250px;width:420px;height:280px;box-sizing:border-box;padding:28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:16px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Coordination</p>
+<p style="margin:22px 0 0;font-size:44px;font-weight:700;letter-spacing:-0.03em">hx</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.4;color:#46505a">Dispatches work and reports back.</p>
+</div>
+
+<div style="position:absolute;left:548px;top:300px;margin:0;width:202px;text-align:center">
+<p style="margin:0;font-size:15px;line-height:1.3;color:#697077">sessions are<br>captured</p>
+<svg width="202" height="18" viewBox="0 0 202 18" style="display:block;margin-top:8px"><line x1="8" y1="9" x2="178" y2="9" stroke="#9aa3ad" stroke-width="2"></line><path d="M178 3 L192 9 L178 15 Z" fill="#9aa3ad"></path><path d="M24 3 L10 9 L24 15 Z" fill="#9aa3ad"></path></svg>
+</div>
+
+<div style="position:absolute;left:750px;top:250px;width:420px;height:280px;box-sizing:border-box;padding:28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:16px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Memory</p>
+<p style="margin:22px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">agentmem</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.4;color:#46505a">Captures every session and keeps one page current.</p>
+</div>
+
+<div style="position:absolute;left:1170px;top:300px;margin:0;width:202px;text-align:center">
+<p style="margin:0;font-size:15px;line-height:1.3;color:#697077">progress<br>feeds memory</p>
+<svg width="202" height="18" viewBox="0 0 202 18" style="display:block;margin-top:8px"><line x1="8" y1="9" x2="178" y2="9" stroke="#9aa3ad" stroke-width="2"></line><path d="M178 3 L192 9 L178 15 Z" fill="#9aa3ad"></path><path d="M24 3 L10 9 L24 15 Z" fill="#9aa3ad"></path></svg>
+</div>
+
+<div style="position:absolute;left:1372px;top:250px;width:420px;height:280px;box-sizing:border-box;padding:28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:16px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Attention</p>
+<p style="margin:22px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">Jotarium</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.4;color:#46505a">Tracks the work and talks to agents over MCP.</p>
+</div>
+
+<svg viewBox="0 0 1664 110" style="position:absolute;left:128px;top:530px;width:1664px;height:110px" aria-label="hx reads the Jotarium board and writes progress back">
+<defs><marker id="j" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#9aa3ad"></path></marker></defs>
+<path d="M372,0 C700,100 964,100 1292,0" fill="none" stroke="#9aa3ad" stroke-width="2" marker-start="url(#j)" marker-end="url(#j)"></path>
+</svg>
+<p style="position:absolute;left:660px;top:614px;margin:0;width:600px;text-align:center;font-size:15px;color:#697077">hx reads the board to pick work &middot; workers write progress back</p>
+
+<div style="position:absolute;left:128px;top:660px;width:1664px;height:160px;box-sizing:border-box;padding:30px 40px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px;display:flex;align-items:center;justify-content:space-between">
+<div>
+<p style="margin:0;font-size:32px;font-weight:700;letter-spacing:-0.02em">79 skills on every agent</p>
+<p style="margin:10px 0 0;font-size:20px;color:#697077">One shared layer of playbooks, checks and rituals.</p>
+</div>
+<p style="margin:0;font-size:20px;line-height:1.5;color:#46505a;text-align:right">58 from pstack<br>10 adopted from others<br>11 written from our own lessons</p>
+</div>
+
+
+</section></div><p class="num">3 / 17</p></div>
+<div><div class="frame"><section id="hx" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:58px;font-weight:700;line-height:1.05;letter-spacing:-0.03em;white-space:nowrap">hx turns a request into a brief and a route</h2>
+<p style="position:absolute;left:128px;top:200px;margin:0;font-size:24px;color:#697077">It runs in Herdr, where every agent works in its own terminal.</p>
+
+<div style="position:absolute;left:1228px;top:128px;width:436px;display:flex;gap:12px">
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #e8590b;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2" style="display:block;margin:0 auto"><path d="M6 3h9l4 4v14H6z"></path><path d="M14 3v5h5"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#e8590b">Brief</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #e8590b;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2" style="display:block;margin:0 auto"><circle cx="6" cy="5" r="2"></circle><circle cx="18" cy="5" r="2"></circle><circle cx="12" cy="19" r="2"></circle><path d="M6 7v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7"></path><path d="M12 13v4"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#e8590b">Route</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:transparent;border:1px solid #c3cad2;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e97a2" stroke-width="2" style="display:block;margin:0 auto"><path d="M14 6l4 4-4 4"></path><path d="M4 20V9a3 3 0 0 1 3-3h11"></path><path d="M4 20l5-5"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#8e97a2">Build</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:transparent;border:1px solid #c3cad2;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e97a2" stroke-width="2" style="display:block;margin:0 auto"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#8e97a2">Review</p>
+</div>
+</div>
+
+<div style="position:absolute;left:128px;top:250px;width:940px;height:620px;box-sizing:border-box;background:#fff;border:1px solid #d3d8df;border-radius:18px">
+<p style="position:absolute;left:40px;top:32px;margin:0;font-size:20px;font-weight:600;color:#e8590b">brief.md</p>
+<p style="position:absolute;right:40px;top:34px;margin:0;font-size:16px;color:#8e97a2">written by the lead</p>
+<div style="position:absolute;left:40px;top:100px;width:860px;height:140px;border-bottom:1px solid #d3d8df">
+<span style="position:absolute;left:0;top:2px;font-size:18px;color:#9aa3ad">01</span>
+<p style="position:absolute;left:60px;top:0;margin:0;font-size:30px;font-weight:700;letter-spacing:-0.02em">goal</p>
+<p style="position:absolute;left:60px;top:46px;margin:0;font-size:20px;color:#697077">What the work must achieve.</p>
+</div>
+<div style="position:absolute;left:40px;top:240px;width:860px;height:140px;border-bottom:1px solid #d3d8df">
+<span style="position:absolute;left:0;top:2px;font-size:18px;color:#9aa3ad">02</span>
+<p style="position:absolute;left:60px;top:0;margin:0;font-size:30px;font-weight:700;letter-spacing:-0.02em">files it may touch</p>
+<p style="position:absolute;left:60px;top:46px;margin:0;font-size:20px;color:#697077">The only paths the worker may write.</p>
+</div>
+<div style="position:absolute;left:40px;top:380px;width:860px;height:140px">
+<span style="position:absolute;left:0;top:2px;font-size:18px;color:#9aa3ad">03</span>
+<p style="position:absolute;left:60px;top:0;margin:0;font-size:30px;font-weight:700;letter-spacing:-0.02em">the command that proves it</p>
+<p style="position:absolute;left:60px;top:46px;margin:0;font-size:20px;color:#697077">The check that must pass before review.</p>
+</div>
+<p style="position:absolute;left:40px;top:546px;margin:0;font-size:20px;color:#8e97a2">A file survives a handoff. A conversation does not.</p>
+</div>
+
+<div style="position:absolute;left:1132px;top:250px;width:532px;height:620px;box-sizing:border-box;background:#11161c;border-radius:18px;color:#f2f4f7">
+<p style="position:absolute;left:36px;top:32px;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.02em">hx decides</p>
+<div style="position:absolute;left:36px;top:100px;width:460px;height:104px;border-bottom:1px solid #2a323c">
+<p style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8e97a2">Worker</p>
+<p style="margin:8px 0 0;font-size:24px">from strengths</p>
+</div>
+<div style="position:absolute;left:36px;top:210px;width:460px;height:104px;border-bottom:1px solid #2a323c">
+<p style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8e97a2">Model</p>
+<p style="margin:8px 0 0;font-size:24px">from the task</p>
+</div>
+<div style="position:absolute;left:36px;top:320px;width:460px;height:104px;border-bottom:1px solid #2a323c">
+<p style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8e97a2">Effort</p>
+<p style="margin:8px 0 0;font-size:24px">from difficulty</p>
+</div>
+<div style="position:absolute;left:36px;top:430px;width:460px;height:104px">
+<p style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#8e97a2">Quota</p>
+<p style="margin:8px 0 0;font-size:24px">live, per subscription</p>
+</div>
+<p style="position:absolute;left:36px;top:552px;margin:0;width:460px;font-size:18px;line-height:1.4;color:#8e97a2">The brief is the input. The route is the decision.</p>
+</div>
+
+
+</section></div><p class="num">4 / 17</p></div>
+<div><div class="frame"><section id="hx-flow" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Nobody checks their own work</h2>
+
+<div style="position:absolute;left:1228px;top:128px;width:436px;display:flex;gap:12px">
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:transparent;border:1px solid #c3cad2;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e97a2" stroke-width="2" style="display:block;margin:0 auto"><path d="M6 3h9l4 4v14H6z"></path><path d="M14 3v5h5"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#8e97a2">Brief</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:transparent;border:1px solid #c3cad2;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e97a2" stroke-width="2" style="display:block;margin:0 auto"><circle cx="6" cy="5" r="2"></circle><circle cx="18" cy="5" r="2"></circle><circle cx="12" cy="19" r="2"></circle><path d="M6 7v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7"></path><path d="M12 13v4"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#8e97a2">Route</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #e8590b;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2" style="display:block;margin:0 auto"><path d="M14 6l4 4-4 4"></path><path d="M4 20V9a3 3 0 0 1 3-3h11"></path><path d="M4 20l5-5"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#e8590b">Build</p>
+</div>
+<div style="width:100px;height:72px;box-sizing:border-box;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #e8590b;text-align:center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2" style="display:block;margin:0 auto"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg>
+<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:#e8590b">Review</p>
+</div>
+</div>
+
+<svg viewBox="0 0 1664 560" style="position:absolute;left:128px;top:280px;width:1664px;height:560px" aria-label="Claude and hx create worktrees, Devin and DeepSeek build, Codex reviews, faults loop back, then Claude proves and merges">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#9aa3ad"></path></marker>
+<marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#e8590b"></path></marker>
+</defs>
+<line x1="230" y1="205" x2="280" y2="205" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></line>
+<path d="M490,205 C545,205 546,95 600,95" fill="none" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></path>
+<path d="M490,205 C545,205 546,325 600,325" fill="none" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></path>
+<polyline points="870,95 925,95 925,205 960,205" fill="none" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></polyline>
+<polyline points="870,325 925,325 925,205 960,205" fill="none" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></polyline>
+<line x1="1210" y1="205" x2="1300" y2="205" stroke="#9aa3ad" stroke-width="2" marker-end="url(#a)"></line>
+<path d="M1085,118 C1085,40 960,40 878,62" fill="none" stroke="#e8590b" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#b)"></path>
+<path d="M1085,292 C1085,370 960,370 878,352" fill="none" stroke="#e8590b" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#b)"></path>
+<text x="900" y="30" fill="#e8590b" font-family="Instrument Sans, sans-serif" font-size="18" font-weight="600">Codex sends faults back to Devin</text>
+<text x="900" y="400" fill="#e8590b" font-family="Instrument Sans, sans-serif" font-size="18" font-weight="600">Codex sends faults back to DeepSeek</text>
+<text x="620" y="452" fill="#e8590b" font-family="Instrument Sans, sans-serif" font-size="15">at most two rounds, then the lead decides</text>
+</svg>
+
+<div style="position:absolute;left:128px;top:400px;width:230px;height:170px;box-sizing:border-box;padding:18px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Lead</p>
+<p style="margin:8px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Claude + hx</p>
+<p style="margin:8px 0 0;font-size:17px;line-height:1.35;color:#697077">Write the brief, create the worktrees.</p>
+</div>
+<div style="position:absolute;left:408px;top:400px;width:210px;height:170px;box-sizing:border-box;padding:18px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Isolation</p>
+<p style="margin:8px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Worktrees</p>
+<p style="margin:8px 0 0;font-size:17px;line-height:1.35;color:#697077">One per worker. No shared files.</p>
+</div>
+<div style="position:absolute;left:728px;top:300px;width:270px;height:150px;box-sizing:border-box;padding:18px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Worktree A</p>
+<p style="margin:6px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Devin</p>
+<p style="margin:6px 0 0;font-size:17px;color:#697077">Builds the change.</p>
+</div>
+<div style="position:absolute;left:728px;top:530px;width:270px;height:150px;box-sizing:border-box;padding:18px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Worktree B</p>
+<p style="margin:6px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">DeepSeek</p>
+<p style="margin:6px 0 0;font-size:17px;color:#697077">Builds the change.</p>
+</div>
+<div style="position:absolute;left:1088px;top:400px;width:250px;height:170px;box-sizing:border-box;padding:18px;background:#11161c;border:1px solid #11161c;border-radius:14px;color:#f2f4f7">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#e8590b">Review</p>
+<p style="margin:8px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Codex</p>
+<p style="margin:8px 0 0;font-size:17px;line-height:1.35;color:#b8c0ca">Another family. Finds the faults, sends them back.</p>
+</div>
+<div style="position:absolute;left:1428px;top:400px;width:240px;height:170px;box-sizing:border-box;padding:18px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Prove + merge</p>
+<p style="margin:8px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Claude</p>
+<p style="margin:8px 0 0;font-size:17px;line-height:1.35;color:#697077">Runs the real app, then merges.</p>
+</div>
+
+
+</section></div><p class="num">5 / 17</p></div>
+<div><div class="frame"><section id="agentmem" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">agentmem carries the work forward</h2>
+
+<svg viewBox="0 0 1664 440" style="position:absolute;left:128px;top:220px;width:1664px;height:440px" aria-label="The vault as a graph: session notes clustered around project pages">
+<line x1="300" y1="210" x2="760" y2="120" stroke="#c3cad2" stroke-width="2"/><line x1="300" y1="210" x2="1060" y2="330" stroke="#c3cad2" stroke-width="2"/><line x1="300" y1="210" x2="1420" y2="170" stroke="#c3cad2" stroke-width="2"/><line x1="300" y1="210" x2="900" y2="360" stroke="#c3cad2" stroke-width="2"/><line x1="240" y1="181" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="157" y1="183" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="254" y1="149" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="396" y1="138" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="434" y1="257" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="315" y1="252" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="346" y1="209" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="268" y1="230" x2="300" y2="210" stroke="#c3cad2" stroke-width="1.5"/><line x1="863" y1="155" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="875" y1="78" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="757" y1="87" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="690" y1="75" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="799" y1="213" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="876" y1="158" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="786" y1="144" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="735" y1="37" x2="760" y2="120" stroke="#c3cad2" stroke-width="1.5"/><line x1="1145" y1="261" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1122" y1="257" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1135" y1="342" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1126" y1="394" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1006" y1="364" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1079" y1="280" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1131" y1="280" x2="1060" y2="330" stroke="#c3cad2" stroke-width="1.5"/><line x1="1448" y1="231" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="1343" y1="143" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="1380" y1="258" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="1356" y1="137" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="1399" y1="98" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="1337" y1="213" x2="1420" y2="170" stroke="#c3cad2" stroke-width="1.5"/><line x1="904" y1="395" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><line x1="818" y1="323" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><line x1="830" y1="374" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><line x1="853" y1="370" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><line x1="908" y1="317" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><line x1="997" y1="424" x2="900" y2="360" stroke="#c3cad2" stroke-width="1.5"/><circle cx="240" cy="181" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="157" cy="183" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="254" cy="149" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="396" cy="138" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="434" cy="257" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="315" cy="252" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="346" cy="209" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="268" cy="230" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="863" cy="155" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="875" cy="78" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="757" cy="87" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="690" cy="75" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="799" cy="213" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="876" cy="158" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="786" cy="144" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="735" cy="37" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1145" cy="261" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1122" cy="257" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1135" cy="342" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1126" cy="394" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1006" cy="364" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1079" cy="280" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1131" cy="280" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1448" cy="231" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1343" cy="143" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1380" cy="258" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1356" cy="137" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1399" cy="98" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="1337" cy="213" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="904" cy="395" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="818" cy="323" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="830" cy="374" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="853" cy="370" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="908" cy="317" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="997" cy="424" r="5" fill="#8e97a2" opacity="0.55"/><circle cx="300" cy="210" r="11" fill="#e8590b"/><circle cx="760" cy="120" r="11" fill="#e8590b"/><circle cx="1060" cy="330" r="11" fill="#e8590b"/><circle cx="1420" cy="170" r="11" fill="#e8590b"/><circle cx="900" cy="360" r="11" fill="#e8590b"/>
+</svg>
+
+<div style="position:absolute;left:140px;top:700px;width:520px;height:176px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 19h16"></path></svg>
+<p style="margin:10px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Capture</p>
+<p style="margin:6px 0 0;font-size:18px;line-height:1.35;color:#46505a">Every session is captured automatically.</p>
+</div>
+<p style="position:absolute;left:660px;top:772px;margin:0;width:40px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+<div style="position:absolute;left:700px;top:700px;width:520px;height:176px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M6 3h9l4 4v14H6z"></path><path d="M14 3v5h5"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg>
+<p style="margin:10px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Consolidate</p>
+<p style="margin:6px 0 0;font-size:18px;line-height:1.35;color:#46505a">A short project page keeps what is true now.</p>
+</div>
+<p style="position:absolute;left:1220px;top:772px;margin:0;width:40px;text-align:center;font-size:22px;color:#e8590b">&rarr;</p>
+<div style="position:absolute;left:1260px;top:700px;width:520px;height:176px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M10 8l6 4-6 4z"></path></svg>
+<p style="margin:10px 0 0;font-size:24px;font-weight:700;letter-spacing:-0.02em">Resume</p>
+<p style="margin:6px 0 0;font-size:18px;line-height:1.35;color:#46505a">The next agent reads one page, not the archive.</p>
+</div>
+
+
+</section></div><p class="num">6 / 17</p></div>
+<div><div class="frame"><section id="jotarium-intro" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Meet Jotarium</h2>
+
+<p style="position:absolute;left:128px;top:260px;margin:0;width:640px;font-size:30px;font-weight:600;line-height:1.35;letter-spacing:-0.015em">My task and idea tracker that is also a game &mdash; the shared workspace where the agents and I meet.</p>
+
+<p style="position:absolute;left:128px;top:420px;margin:0;width:640px;font-size:22px;line-height:1.6;color:#46505a">Where ideas grow and adventures unfold. Everything on this board &mdash; tasks, ideas, companions, badges &mdash; is the same world the agents read and write over MCP.</p>
+
+<div style="position:absolute;left:128px;top:580px;display:flex;gap:14px">
+<span style="padding:10px 18px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:16px;font-weight:600;color:#46505a">Tasks &amp; ideas</span>
+<span style="padding:10px 18px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:16px;font-weight:600;color:#46505a">Companions &amp; badges</span>
+<span style="padding:10px 18px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:16px;font-weight:600;color:#46505a">MCP for every agent</span>
+</div>
+
+<img src="assets/92066adc8f57637a80667c89b9814443.png" alt="The jotarium.com landing page: Your work, with a little wonder around the edges" style="position:absolute;left:850px;top:190px;width:930px;height:640px;object-fit:cover;object-position:top left;border-radius:18px;border:1px solid #d3d8df;box-shadow:0 12px 32px rgba(17,22,28,.08)">
+<p style="position:absolute;left:850px;top:848px;margin:0;width:930px;text-align:center;font-size:15px;color:#697077">jotarium.com &mdash; free for Windows and Mac</p>
+
+<div style="position:absolute;left:1608px;top:888px;height:58px;box-sizing:border-box;padding:8px 14px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d3d8df;border-radius:12px">
+<img src="assets/dd95c7c79e92a92b7a49300fcb036bb5.svg" alt="QR code for jotarium.com" style="width:42px;height:42px">
+<p style="margin:0;font-size:14px;font-weight:600;color:#46505a">jotarium.com</p>
+</div>
+
+
+</section></div><p class="num">7 / 17</p></div>
+<div><div class="frame"><section id="review" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:56px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Jotarium brings me only what needs me</h2>
+
+<img src="assets/11cb09373357cae4e852ec37fc612536.png" alt="Jotarium Needs you tab with a Decide card and a Check card, on the synthetic talk save" style="position:absolute;left:128px;top:250px;width:720px;height:558px;object-fit:cover;object-position:top center;border-radius:14px;border:1px solid #d3d8df">
+
+<p style="position:absolute;left:900px;top:252px;margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">Before</p>
+<div style="position:absolute;left:900px;top:282px;width:892px;height:104px;box-sizing:border-box;padding:24px 28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:14px;display:flex;align-items:center;justify-content:space-between">
+<p style="margin:0;font-size:24px;font-weight:600;letter-spacing:-0.01em">Read these 99 documents.</p>
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9aa3ad" stroke-width="2"><path d="M6 3h9l4 4v14H6z"></path><path d="M14 3v5h5"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+</div>
+
+<div style="position:absolute;left:1320px;top:398px;margin:0;width:52px;text-align:center;font-size:22px;color:#e8590b">&darr;</div>
+
+<p style="position:absolute;left:900px;top:444px;margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">After</p>
+<div style="position:absolute;left:900px;top:474px;width:892px;height:336px;box-sizing:border-box;padding:24px 28px;background:#fff;border:1px solid #d3d8df;border-radius:14px">
+<span style="position:absolute;left:28px;top:24px;padding:5px 10px;background:#fbe7da;color:#b8450a;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase">Check</span>
+<span style="position:absolute;right:28px;top:28px;font-size:14px;color:#8e97a2">Needs you &middot; 1 of 2</span>
+<p style="position:absolute;left:28px;top:58px;margin:0;font-size:23px;font-weight:700;letter-spacing:-0.02em">Prepare the portfolio preview</p>
+<p style="position:absolute;left:28px;top:96px;margin:0;font-size:16px;color:#697077">Where: Jotarium &rarr; Tasks &rarr; Launch the portfolio site</p>
+<p style="position:absolute;left:28px;top:126px;margin:0;font-size:16px;line-height:1.55;color:#11161c">1. Open the portfolio project.<br>2. Read the task titles and statuses.<br>3. Look for finished work and clear next steps.</p>
+<p style="position:absolute;left:28px;top:220px;margin:0;font-size:16px;color:#11161c"><span style="color:#697077">Expect</span> &nbsp;the project is easy to scan.</p>
+<span style="position:absolute;left:28px;top:264px;padding:9px 18px;background:#11161c;color:#fff;border-radius:8px;font-size:15px;font-weight:600">Accept</span>
+<span style="position:absolute;left:124px;top:264px;padding:8px 16px;border:1px solid #c3cad2;border-radius:8px;font-size:15px;font-weight:600;color:#46505a">Doesn't need me</span>
+<span style="position:absolute;left:286px;top:272px;font-size:14px;color:#8e97a2">closes the card, keeps the XP</span>
+</div>
+
+<div style="position:absolute;left:900px;top:850px;width:892px;display:flex;gap:12px">
+<span style="padding:8px 14px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:15px;color:#46505a"><b>Check</b> &nbsp;look</span>
+<span style="padding:8px 14px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:15px;color:#46505a"><b>Decide</b> &nbsp;choose</span>
+<span style="padding:8px 14px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:999px;font-size:15px;color:#46505a"><b>Do</b> &nbsp;act</span>
+</div>
+
+<div style="position:absolute;left:1608px;top:888px;height:58px;box-sizing:border-box;padding:8px 14px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d3d8df;border-radius:12px">
+<img src="assets/dd95c7c79e92a92b7a49300fcb036bb5.svg" alt="QR code for jotarium.com" style="width:42px;height:42px">
+<p style="margin:0;font-size:14px;font-weight:600;color:#46505a">jotarium.com</p>
+</div>
+
+
+</section></div><p class="num">8 / 17</p></div>
+<div><div class="frame"><section id="game" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Work worth coming back to</h2>
+
+<img src="assets/2ef8a75a6b6408557aba63a4a83ab390.png" alt="Jotarium Shrine summoning a companion, on the synthetic talk save" style="position:absolute;left:148px;top:230px;width:520px;height:520px;object-fit:cover;object-position:58% center;border-radius:14px;border:1px solid #d3d8df">
+<img src="assets/d79bd0caae1a87a7a7b941729983b07a.png" alt="Jotarium Bestiary: the Ember line complete with its first gold crown, the Gale and Leaf lines still undiscovered" style="position:absolute;left:700px;top:230px;width:520px;height:520px;object-fit:cover;object-position:center top;border-radius:14px;border:1px solid #d3d8df">
+<img src="assets/8386cda9a5e5abeb4a889f66ae8e00fa.png" alt="Jotarium Profile achievements with earned badges" style="position:absolute;left:1252px;top:230px;width:520px;height:520px;object-fit:cover;object-position:58% center;border-radius:14px;border:1px solid #d3d8df">
+
+<p style="position:absolute;left:148px;top:782px;margin:0;width:520px;text-align:center;font-size:30px;font-weight:600;letter-spacing:-0.01em">Summon</p>
+<p style="position:absolute;left:700px;top:782px;margin:0;width:520px;text-align:center;font-size:30px;font-weight:600;letter-spacing:-0.01em">Collect</p>
+<p style="position:absolute;left:1252px;top:782px;margin:0;width:520px;text-align:center;font-size:30px;font-weight:600;letter-spacing:-0.01em">Celebrate</p>
+
+<div style="position:absolute;left:1608px;top:888px;height:58px;box-sizing:border-box;padding:8px 14px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d3d8df;border-radius:12px">
+<img src="assets/dd95c7c79e92a92b7a49300fcb036bb5.svg" alt="QR code for jotarium.com" style="width:42px;height:42px">
+<p style="margin:0;font-size:14px;font-weight:600;color:#46505a">jotarium.com</p>
+</div>
+
+
+</section></div><p class="num">9 / 17</p></div>
+<div><div class="frame"><section id="jotarium" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:56px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Jotarium is where the agents and I meet</h2>
+
+<div style="position:absolute;left:128px;top:260px;width:400px;height:260px;box-sizing:border-box;padding:28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">My side</p>
+<p style="margin:12px 0 0;font-size:36px;font-weight:700;letter-spacing:-0.03em">Me</p>
+<p style="margin:16px 0 0;font-size:19px;line-height:1.7;color:#46505a">Dump ideas<br>Read the board<br>Answer what needs me</p>
+</div>
+
+<div style="position:absolute;left:528px;top:300px;width:232px;text-align:center">
+<p style="margin:0;font-size:15px;color:#697077">writes and reviews</p>
+<svg width="232" height="18" viewBox="0 0 232 18" style="display:block;margin-top:8px"><line x1="10" y1="9" x2="222" y2="9" stroke="#9aa3ad" stroke-width="2"></line><path d="M10 3 L-4 9 L10 15 Z" fill="#9aa3ad"></path><path d="M222 3 L236 9 L222 15 Z" fill="#9aa3ad"></path></svg>
+</div>
+
+<div style="position:absolute;left:760px;top:260px;width:400px;height:260px;box-sizing:border-box;padding:28px;background:#11161c;border:1px solid #11161c;border-radius:18px;color:#f2f4f7">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Shared workspace</p>
+<p style="margin:10px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">Jotarium</p>
+<p style="margin:14px 0 0;font-size:18px;line-height:1.65;color:#b8c0ca">Ideas, projects, features, tasks<br>The board and Needs you<br>MCP for every agent</p>
+</div>
+
+<div style="position:absolute;left:1160px;top:300px;width:232px;text-align:center">
+<p style="margin:0;font-size:15px;color:#697077">over MCP</p>
+<svg width="232" height="18" viewBox="0 0 232 18" style="display:block;margin-top:8px"><line x1="10" y1="9" x2="222" y2="9" stroke="#9aa3ad" stroke-width="2"></line><path d="M10 3 L-4 9 L10 15 Z" fill="#9aa3ad"></path><path d="M222 3 L236 9 L222 15 Z" fill="#9aa3ad"></path></svg>
+</div>
+
+<div style="position:absolute;left:1392px;top:260px;width:400px;height:260px;box-sizing:border-box;padding:28px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">Their side</p>
+<p style="margin:12px 0 0;font-size:36px;font-weight:700;letter-spacing:-0.03em">Agents</p>
+<p style="margin:16px 0 0;font-size:19px;line-height:1.7;color:#46505a">Create and update work<br>Write progress<br>Pick up what is next</p>
+</div>
+
+<div style="position:absolute;left:1049px;top:520px;width:2px;height:100px;background:#9aa3ad"></div>
+<p style="position:absolute;left:1064px;top:548px;margin:0;width:200px;font-size:15px;color:#697077">progress feeds memory</p>
+
+<div style="position:absolute;left:920px;top:620px;width:400px;height:170px;box-sizing:border-box;padding:26px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Memory</p>
+<p style="margin:10px 0 0;font-size:28px;font-weight:700;letter-spacing:-0.02em">agentmem</p>
+<p style="margin:8px 0 0;font-size:18px;line-height:1.4;color:#46505a">The progress Jotarium tracks becomes memory.</p>
+</div>
+
+<div style="position:absolute;left:1608px;top:888px;height:58px;box-sizing:border-box;padding:8px 14px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d3d8df;border-radius:12px">
+<img src="assets/dd95c7c79e92a92b7a49300fcb036bb5.svg" alt="QR code for jotarium.com" style="width:42px;height:42px">
+<p style="margin:0;font-size:14px;font-weight:600;color:#46505a">jotarium.com</p>
+</div>
+
+<div style="position:absolute;left:128px;top:620px;width:300px;height:170px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">My phone</p>
+<p style="margin:8px 0 0;font-size:28px;font-weight:700;letter-spacing:-0.02em">Meta Muse</p>
+<p style="margin:10px 0 0;font-size:17px;line-height:1.4;color:#46505a">Captures an idea the moment I say it.</p>
+</div>
+
+<div style="position:absolute;left:436px;top:696px;width:36px;text-align:center">
+<svg width="36" height="18" viewBox="0 0 36 18" style="display:block"><line x1="2" y1="9" x2="26" y2="9" stroke="#9aa3ad" stroke-width="2"></line><path d="M26 3 L40 9 L26 15 Z" fill="#9aa3ad" transform="translate(-5,0)"></path></svg>
+</div>
+
+<div style="position:absolute;left:480px;top:620px;width:280px;height:170px;box-sizing:border-box;padding:24px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">Private inbox</p>
+<p style="margin:8px 0 0;font-size:28px;font-weight:700;letter-spacing:-0.02em">Cloudflare</p>
+<p style="margin:10px 0 0;font-size:17px;line-height:1.4;color:#46505a">A Worker with an add-only token. Idea text only.</p>
+</div>
+
+<svg viewBox="0 0 110 112" style="position:absolute;left:730px;top:508px;width:110px;height:112px" aria-label="Jotarium collects the idea from the inbox">
+<defs><marker id="mi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#9aa3ad"></path></marker></defs>
+<path d="M10,112 L10,32 L100,32 L100,12" fill="none" stroke="#9aa3ad" stroke-width="2" marker-end="url(#mi)"></path>
+</svg>
+<p style="position:absolute;left:556px;top:548px;margin:0;width:170px;font-size:15px;line-height:1.35;color:#697077;text-align:right">collects every 3 h, read-only</p>
+
+
+</section></div><p class="num">10 / 17</p></div>
+<div><div class="frame"><section id="skills" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">The skills that tie everything together</h2>
+
+<p style="position:absolute;left:128px;top:250px;margin:0;width:1400px;font-size:30px;font-weight:600;line-height:1.35;letter-spacing:-0.015em">One shared set of skill files. Claude, Codex, DeepSeek and Devin all read the same ones.</p>
+
+<div style="position:absolute;left:128px;top:400px;width:520px;height:340px;box-sizing:border-box;padding:36px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Rituals</p>
+<p style="margin:18px 0 0;font-size:36px;font-weight:700;letter-spacing:-0.03em">How a session runs</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.45;color:#46505a">Kickoff, away, catch-up, rant. The same shape every time.</p>
+</div>
+
+<div style="position:absolute;left:700px;top:400px;width:520px;height:340px;box-sizing:border-box;padding:36px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Playbooks</p>
+<p style="margin:18px 0 0;font-size:36px;font-weight:700;letter-spacing:-0.03em">How work gets done</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.45;color:#46505a">Bug fix, feature, review, verify. Each agent follows the same steps.</p>
+</div>
+
+<div style="position:absolute;left:1272px;top:400px;width:520px;height:340px;box-sizing:border-box;padding:36px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px">
+<p style="margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#e8590b">Memory</p>
+<p style="margin:18px 0 0;font-size:36px;font-weight:700;letter-spacing:-0.03em">What we decided before</p>
+<p style="margin:18px 0 0;font-size:22px;line-height:1.45;color:#46505a">Searched before anyone guesses, and updated when a session ends.</p>
+</div>
+
+<p style="position:absolute;left:128px;top:820px;margin:0;font-size:24px;color:#697077">Change a skill once, and every agent works the new way.</p>
+
+
+</section></div><p class="num">11 / 17</p></div>
+<div><div class="frame"><section id="rituals" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Every session has the same shape</h2>
+
+<div style="position:absolute;left:128px;top:260px;width:386px;height:460px;box-sizing:border-box;padding:32px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px;display:flex;flex-direction:column;justify-content:center">
+<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M6 21V4"></path><path d="M6 4h12l-3 4.5 3 4.5H6"></path></svg>
+<p style="margin:34px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">/kickoff</p>
+<p style="margin:20px 0 0;font-size:22px;line-height:1.4;color:#46505a">Loads the way of working and picks the work.</p>
+</div>
+
+<div style="position:absolute;left:554px;top:260px;width:386px;height:460px;box-sizing:border-box;padding:32px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px;display:flex;flex-direction:column;justify-content:center">
+<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"></path></svg>
+<p style="margin:34px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">/afk</p>
+<p style="margin:20px 0 0;font-size:22px;line-height:1.4;color:#46505a">Keeps going while I am away, with proof.</p>
+</div>
+
+<div style="position:absolute;left:980px;top:260px;width:386px;height:460px;box-sizing:border-box;padding:32px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px;display:flex;flex-direction:column;justify-content:center">
+<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M4 7h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
+<p style="margin:34px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">/catchup</p>
+<p style="margin:20px 0 0;font-size:22px;line-height:1.4;color:#46505a">Tells me what landed and what waits on me.</p>
+</div>
+
+<div style="position:absolute;left:1406px;top:260px;width:386px;height:460px;box-sizing:border-box;padding:32px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:18px;display:flex;flex-direction:column;justify-content:center">
+<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#e8590b" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 9h8"></path><path d="M8 13h5"></path></svg>
+<p style="margin:34px 0 0;font-size:40px;font-weight:700;letter-spacing:-0.03em">/rant</p>
+<p style="margin:20px 0 0;font-size:22px;line-height:1.4;color:#46505a">Turns my questions into claims the team settles.</p>
+</div>
+
+
+
+</section></div><p class="num">12 / 17</p></div>
+<div><div class="frame"><section id="greats" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Learning from the greats</h2>
+
+<div style="position:absolute;left:128px;top:280px;width:386px;height:240px;text-align:center">
+<img src="assets/e11c41fcecd241c13b7c1dbd84fa2852.jpg" alt="Lauren Tan" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Prove it on the real thing"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Lauren Tan</p>
+</div>
+
+<div style="position:absolute;left:554px;top:280px;width:386px;height:240px;text-align:center">
+<img src="assets/e050e1a56ccc2ebbc9ac86a364ce6b7c.jpg" alt="Matt Pocock" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Stay out of the dumb zone"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Matt Pocock</p>
+</div>
+
+<div style="position:absolute;left:980px;top:280px;width:386px;height:240px;text-align:center">
+<img src="assets/aca56d8c1c1f172c8c5d84ec00673bac.jpg" alt="Theo Browne" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Ask for bigger work"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Theo Browne</p>
+</div>
+
+<div style="position:absolute;left:1406px;top:280px;width:386px;height:240px;text-align:center">
+<img src="assets/b96c10adfebc9a5e485761a246a077b3.jpg" alt="Andrej Karpathy" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Let the metric decide"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Andrej Karpathy</p>
+</div>
+
+<div style="position:absolute;left:341px;top:600px;width:386px;height:240px;text-align:center">
+<img src="assets/b8c9b8a693e786d79e3061063f4ae242.jpg" alt="Felix Rieseberg" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Aim at the goal beyond"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Felix Rieseberg</p>
+</div>
+
+<div style="position:absolute;left:767px;top:600px;width:386px;height:240px;text-align:center">
+<img src="assets/13022815d80f94fc7880ddbb5f80a782.jpg" alt="Simon Willison" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Explore loose, ship strict"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Simon Willison</p>
+</div>
+
+<div style="position:absolute;left:1193px;top:600px;width:386px;height:240px;text-align:center">
+<img src="assets/94ce83dd6f233ab4cc3c13de9422ea5d.jpg" alt="Addy Osmani" style="width:120px;height:120px;margin:0 auto;border-radius:50%;object-fit:cover;display:block">
+<p style="margin:20px 0 0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">"Own the last 30%"</p>
+<p style="margin:12px 0 0;font-size:13px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#697077">Addy Osmani</p>
+</div>
+
+<p style="position:absolute;left:128px;top:920px;margin:0;width:1664px;text-align:center;font-size:24px;color:#697077">68 of their methods, each checked against 14 days of our own logs.</p>
+
+
+
+</section></div><p class="num">13 / 17</p></div>
+<div><div class="frame"><section id="broke" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:56px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">Every failure makes the system better</h2>
+
+<svg viewBox="0 0 1664 420" style="position:absolute;left:128px;top:280px;width:1664px;height:420px" aria-label="The handoff line drops at Record and recovers by Verify">
+<polyline points="0,60 300,60 700,300 1040,300 1440,60 1664,60" fill="none" stroke="#e8590b" stroke-width="2"></polyline>
+<circle cx="300" cy="60" r="9" fill="#e8590b"></circle>
+<circle cx="700" cy="300" r="9" fill="#e8590b"></circle>
+<circle cx="1040" cy="300" r="9" fill="#e8590b"></circle>
+<circle cx="1440" cy="60" r="9" fill="#e8590b"></circle>
+</svg>
+
+<p style="position:absolute;left:328px;top:286px;margin:0;width:200px;text-align:center;font-size:32px;font-weight:600;letter-spacing:-0.02em">Notice</p>
+<p style="position:absolute;left:728px;top:610px;margin:0;width:200px;text-align:center;font-size:32px;font-weight:600;letter-spacing:-0.02em">Record</p>
+<p style="position:absolute;left:1068px;top:610px;margin:0;width:200px;text-align:center;font-size:32px;font-weight:600;letter-spacing:-0.02em">Fix</p>
+<p style="position:absolute;left:1368px;top:286px;margin:0;width:200px;text-align:center;font-size:32px;font-weight:600;letter-spacing:-0.02em">Verify</p>
+
+<p style="position:absolute;left:278px;top:700px;margin:0;width:300px;text-align:center;font-size:20px;line-height:1.35;color:#697077">Two agents broke each other's runs.</p>
+<p style="position:absolute;left:678px;top:700px;margin:0;width:300px;text-align:center;font-size:20px;line-height:1.35;color:#697077">The lesson goes into memory.</p>
+<p style="position:absolute;left:1018px;top:700px;margin:0;width:300px;text-align:center;font-size:20px;line-height:1.35;color:#697077">One rule. One worktree per worker.</p>
+<p style="position:absolute;left:1418px;top:700px;margin:0;width:300px;text-align:center;font-size:20px;line-height:1.35;color:#697077">The next run proves it.</p>
+
+<p style="position:absolute;left:128px;top:840px;margin:0;font-size:22px;color:#46505a">The fix is a rule the tool enforces, not a promise to be careful.</p>
+
+
+
+</section></div><p class="num">14 / 17</p></div>
+<div><div class="frame"><section id="impact" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">What this team built</h2>
+
+<p style="position:absolute;left:128px;top:250px;margin:0;font-size:14px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#697077">The tools</p>
+<div style="position:absolute;left:128px;top:286px;width:8px;height:8px;background:#e8590b;border-radius:2px"></div>
+<p style="position:absolute;left:156px;top:272px;margin:0;font-size:30px;font-weight:600">hx</p>
+<div style="position:absolute;left:128px;top:350px;width:8px;height:8px;background:#e8590b;border-radius:2px"></div>
+<p style="position:absolute;left:156px;top:336px;margin:0;font-size:30px;font-weight:600">agentmem</p>
+<div style="position:absolute;left:128px;top:414px;width:8px;height:8px;background:#e8590b;border-radius:2px"></div>
+<p style="position:absolute;left:156px;top:400px;margin:0;font-size:30px;font-weight:600">Jotarium</p>
+<div style="position:absolute;left:128px;top:478px;width:8px;height:8px;background:#e8590b;border-radius:2px"></div>
+<p style="position:absolute;left:156px;top:464px;margin:0;font-size:30px;font-weight:600">79 shared skills</p>
+
+<p style="position:absolute;left:128px;top:590px;margin:0;font-size:56px;font-weight:700;letter-spacing:-0.03em;color:#e8590b">1,074</p>
+<p style="position:absolute;left:128px;top:660px;margin:0;width:560px;font-size:22px;line-height:1.45;color:#11161c">commits in the last 30 days, across 11 repositories</p>
+<p style="position:absolute;left:128px;top:742px;margin:0;font-size:15px;color:#8e97a2">From git history, measured 14 November 2026.</p>
+
+<img src="assets/3bebd4325abae2d5556cf0435967a8ef.png" alt="Portfolio website home page, desktop view" style="position:absolute;left:792px;top:260px;width:998px;height:624px;object-fit:cover;object-position:left top;border-radius:14px;border:1px solid #d3d8df">
+
+<div style="position:absolute;left:792px;top:890px;width:56px;height:56px;box-sizing:border-box;padding:3px;background:#fff;border:1px solid #d3d8df;border-radius:8px"><img src="assets/ae8e3b2886b0d2ac3d12e138b5e38793.svg" alt="QR code for casper5253.github.io" style="display:block;width:48px;height:48px"></div>
+<p style="position:absolute;left:864px;top:892px;margin:0;font-size:18px;font-weight:600">One example of what this setup built</p>
+<p style="position:absolute;left:864px;top:920px;margin:0;font-size:15px;color:#697077">casper5253.github.io</p>
+
+
+
+</section></div><p class="num">15 / 17</p></div>
+<div><div class="frame"><section id="demo" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#e9ecf1;color:#11161c;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:128px;margin:0;font-size:64px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;white-space:nowrap">The loop, live</h2>
+<p style="position:absolute;left:128px;top:204px;margin:0;font-size:24px;color:#697077">One /kickoff session, from picking the work to capturing the memory.</p>
+
+<div style="position:absolute;left:137px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">01</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">/kickoff</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">Loads the way of working. Starts the team.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">Team</p>
+</div>
+<p style="position:absolute;left:355px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:375px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">02</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">Jotarium picks</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">The next task, from the board.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">Jotarium</p>
+</div>
+<p style="position:absolute;left:593px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:613px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">03</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">hx routes</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">Worker, model, effort, live quota.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">hx</p>
+</div>
+<p style="position:absolute;left:831px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:851px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">04</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">Workers build</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">In parallel, each in a worktree.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">Worktrees</p>
+</div>
+<p style="position:absolute;left:1069px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:1089px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#11161c;border:1px solid #11161c;border-radius:16px;color:#f2f4f7">
+<p style="margin:0;font-size:14px;color:#8e97a2">05</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">Another family reviews</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#b8c0ca">Never the author's model.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">Review</p>
+</div>
+<p style="position:absolute;left:1307px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:1327px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">06</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">Jotarium updated</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">Progress and a review card.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">Jotarium</p>
+</div>
+<p style="position:absolute;left:1545px;top:505px;margin:0;width:20px;text-align:center;font-size:14px;color:#9aa3ad">&rarr;</p>
+<div style="position:absolute;left:1565px;top:310px;width:218px;height:420px;box-sizing:border-box;padding:20px;background:#f7f8fa;border:1px solid #d3d8df;border-radius:16px">
+<p style="margin:0;font-size:14px;color:#9aa3ad">07</p>
+<p style="margin:20px 0 0;font-size:20px;font-weight:700;letter-spacing:-0.02em">agentmem captures</p>
+<p style="margin:14px 0 0;font-size:16px;line-height:1.4;color:#46505a">The session becomes memory.</p>
+<p style="position:absolute;left:20px;bottom:20px;margin:0;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#e8590b">agentmem</p>
+</div>
+
+
+
+</section></div><p class="num">16 / 17</p></div>
+<div><div class="frame"><section id="invite" data-transition="fade" style="position:relative;width:1920px;height:1080px;box-sizing:border-box;overflow:hidden;background:#11161c;color:#f2f4f7;font-family:'Instrument Sans','Segoe UI',system-ui,sans-serif;padding:0">
+<h2 style="position:absolute;left:128px;top:200px;margin:0;width:1664px;text-align:center;font-size:72px;font-weight:700;line-height:1.02;letter-spacing:-0.035em">Jotarium</h2>
+<p style="position:absolute;left:128px;top:306px;margin:0;width:1664px;text-align:center;font-size:30px;color:#b8c0ca">Where ideas grow and adventures unfold.</p>
+
+<div style="position:absolute;left:796px;top:386px;width:328px;height:328px;box-sizing:border-box;padding:14px;background:#fff;border-radius:16px">
+<img src="assets/dd95c7c79e92a92b7a49300fcb036bb5.svg" alt="QR code for jotarium.com" style="display:block;width:300px;height:300px">
+</div>
+
+<p style="position:absolute;left:128px;top:756px;margin:0;width:1664px;text-align:center;font-size:56px;font-weight:600;letter-spacing:-0.03em">jotarium.com</p>
+<p style="position:absolute;left:128px;top:840px;margin:0;width:1664px;text-align:center;font-size:26px;color:#e8c27a">Free for Windows and Mac</p>
+
+<div style="position:absolute;left:128px;top:820px;width:132px;height:132px;box-sizing:border-box;padding:8px;background:#fff;border-radius:12px"><img src="assets/0a32e29aa9be38aab3dfff7e04ef1a74.svg" alt="QR code for casper5253.github.io/talk, these slides" style="display:block;width:116px;height:116px"></div>
+<p style="position:absolute;left:280px;top:846px;margin:0;width:300px;font-size:26px;font-weight:600">These slides</p>
+<p style="position:absolute;left:280px;top:886px;margin:0;width:300px;font-size:18px;color:#b8c0ca">casper5253.github.io/talk</p>
+
+<div style="position:absolute;left:1660px;top:820px;width:132px;height:132px;box-sizing:border-box;padding:8px;background:#fff;border-radius:12px"><img src="assets/42855ce9ce14e20fd7b4ba62d8bad3b3.svg" alt="QR code for Casper's LinkedIn" style="display:block;width:116px;height:116px"></div>
+<p style="position:absolute;left:1340px;top:846px;margin:0;width:300px;text-align:right;font-size:26px;font-weight:600">LinkedIn</p>
+<p style="position:absolute;left:1340px;top:886px;margin:0;width:300px;text-align:right;font-size:18px;color:#b8c0ca">linkedin.com/in/caspervtongeren</p>
+
+
+</section></div><p class="num">17 / 17</p></div>
+</main>
+<footer><a href="/">casper5253.github.io</a></footer>
+<script>
+  const fit = () => document.querySelectorAll('.frame').forEach((f) => {
+    f.firstElementChild.style.transform = 'scale(' + f.clientWidth / 1920 + ')';
+  });
+  addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>
